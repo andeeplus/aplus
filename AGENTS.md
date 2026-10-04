@@ -29,9 +29,12 @@ Inside a skill, progressive disclosure keeps what an agent loads small:
 
 ## Versions and changelog
 
-- Changesets owns the version. It stays at 0.1.0, with no changesets, until the first set of skills is complete.
-- After that, every change a user notices adds a changeset in `.changeset/`, written by hand as the commit-expert skill describes. Its summary starts with the skill's name, such as `triage: ask for a reproduction before labelling`.
-- To release, run `pnpm changeset:version`. It bumps `package.json`, writes `CHANGELOG.md`, and copies the version into the three plugin manifests. `pnpm check` fails when a manifest's version differs from `package.json`.
+- Changesets owns the version. It stays at 0.1.0, with no changesets, until the first set of skills is complete. Then run `pnpm changeset tag` and `git push --follow-tags` to tag `v0.1.0`.
+- After that, every change a user notices adds a changeset in `.changeset/`, written by hand as the commit-expert skill describes. Every changeset is a `patch` for now. Its summary starts with the skill's name, such as `triage: ask for a reproduction before labelling`.
+- To release:
+    1. `pnpm changeset:version` bumps `package.json`, writes `CHANGELOG.md`, and copies the version into the three plugin manifests. `pnpm check` fails when a manifest's version differs from `package.json`.
+    2. Commit the result as `chore: release v<version>`.
+    3. `pnpm changeset tag` tags the commit `v<version>`, and `git push --follow-tags` publishes the commit and the tag.
 - An installed copy stays on its version until the version changes. To try unreleased changes in Claude Code, load this folder for one session: `claude --plugin-dir <path to this repository>`.
 
 ## Commits
