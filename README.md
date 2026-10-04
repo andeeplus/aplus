@@ -14,7 +14,7 @@ Agent skills for shipping changes with care: a ship gate before every commit or 
 
 ```
 /plugin marketplace add andeeplus/aplus
-/plugin install aplus@aplus
+/plugin install aplus@andeeplus
 ```
 
 Send them as two separate prompts. The skills are then available as `aplus:<skill>`.
@@ -23,7 +23,7 @@ Send them as two separate prompts. The skills are then available as `aplus:<skil
 
 ```sh
 codex plugin marketplace add andeeplus/aplus
-codex plugin add aplus@aplus
+codex plugin add aplus@andeeplus
 ```
 
 ### OpenCode

@@ -1,6 +1,6 @@
 {
-	"name": "aplus",
-	"interface": { "displayName": "aplus" },
+	"name": "andeeplus",
+	"interface": { "displayName": "andeeplus" },
 	"plugins": [
 		{
 			"name": "aplus",

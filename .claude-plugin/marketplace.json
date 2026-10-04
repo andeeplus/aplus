@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json.schemastore.org/claude-code-marketplace.json",
-	"name": "aplus",
+	"name": "andeeplus",
 	"description": "Agent workflow for shipping changes: a ship gate, a second opinion from another model, codebase audits, issue-driven programs and stacked pull requests.",
 	"owner": { "name": "Andrea Zanenghi", "url": "https://github.com/andeeplus" },
 	"plugins": [
