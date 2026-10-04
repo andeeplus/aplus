@@ -51,7 +51,9 @@ The skills are generic: they never name a project's commands, branches or paths.
 | [atlassian](skills/atlassian/SKILL.md)                             | Bitbucket pull requests and pipelines, Jira issues, Confluence pages, through atlassian-cli              |
 | [github](skills/github/SKILL.md)                                   | Issues from validated draft files, pull requests and stacks with gh-stack, checks and reviews through gh |
 | [audit](skills/audit/SKILL.md)                                     | Audit an area into local notes, turn findings into issues, carry them through to merged PRs              |
-| [triage](skills/triage/SKILL.md)                                   | Triage incoming issues: duplicates, reproduction, bug or intended, and a recommendation to approve       |
+| [triage](skills/triage/SKILL.md)                                   | Decide what to do with a ticket: is it real, where does it live, bug, misuse or request                  |
+| [debug](skills/debug/SKILL.md)                                     | Find a bug's root cause with a loop that fails, then fix it behind a regression test                     |
+| [handoff](skills/handoff/SKILL.md)                                 | Pause work into a note a fresh agent can resume from                                                     |
 | [code-quality](skills/code-quality/SKILL.md)                       | Strict maintainability check of the current branch's changes; final-review's code-quality reviewer       |
 
 ## Versions
