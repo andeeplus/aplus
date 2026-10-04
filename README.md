@@ -6,7 +6,7 @@
 ██  ██   █     █████▀ ██ ▀█▄ ██ ██████ ██████ █████▀
 ```
 
-Agent skills for shipping changes with care: a ship gate before every commit or pull request, a second opinion from a different model, audits that become issues, stacked pull requests, and Gherkin scenarios for every bug. They work in Claude Code, Codex and Cursor.
+Agent skills for shipping changes with care: a ship gate before every commit or pull request, a second opinion from a different model, audits that become issues, stacked pull requests, and Gherkin scenarios for every bug. They work in Claude Code, Codex, Cursor, OpenCode and Pi.
 
 ## Install
 
@@ -26,9 +26,35 @@ codex plugin marketplace add andeeplus/aplus
 codex plugin add aplus@aplus
 ```
 
+### OpenCode
+
+Add the plugin to `opencode.json`. OpenCode installs it from GitHub at startup.
+
+```json
+{ "plugin": ["github:andeeplus/aplus"] }
+```
+
+OpenCode 2 reads the same entry under `plugins`.
+
+### Pi
+
+```sh
+pi install git:github.com/andeeplus/aplus
+```
+
 ### Cursor
 
-`.cursor-plugin/plugin.json` describes the plugin. An install path for Cursor is not set up yet.
+Cursor has no install command for a plugin from GitHub. Use one of these:
+
+- **For yourself:** clone the repository into Cursor's local plugins folder, then run **Developer: Reload Window**. The skills appear under **Customize**. Pull the clone to update.
+
+    ```sh
+    git clone https://github.com/andeeplus/aplus ~/.cursor/plugins/local/aplus
+    ```
+
+    On Teams and Enterprise, an admin must turn on **Allow Local Plugin Imports**.
+
+- **For a team** (Teams and Enterprise): in the Cursor dashboard, open **Plugins & MCPs**, select **Add Marketplace**, then **Import from Repo** with `https://github.com/andeeplus/aplus`.
 
 ## Use it in a project
 

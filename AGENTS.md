@@ -4,10 +4,11 @@ This repository is the aplus plugin: generic agent skills, plus a thin manifest 
 
 ## Layout
 
-| Path                                                                       | Holds                                                                     |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `skills/<name>/`                                                           | One folder per skill. Every tool reads this folder.                       |
-| `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/` | Manifests and marketplaces. They only point at `skills/`; keep them thin. |
+| Path                                                                                        | Holds                                                                     |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `skills/<name>/`                                                                            | One folder per skill. Every tool reads this folder.                       |
+| `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/`                  | Manifests and marketplaces. They only point at `skills/`; keep them thin. |
+| `.opencode/plugins/index.js` (the `main` of `package.json`), the `pi` key in `package.json` | The OpenCode plugin and the Pi package. They only register `skills/`.     |
 
 Inside a skill, progressive disclosure keeps what an agent loads small:
 
