@@ -42,6 +42,7 @@ The skills are generic: they never name a project's commands, branches or paths.
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
 | [commit-expert](skills/commit-expert/SKILL.md)                     | Commit messages, PR titles, changelog lines and release notes; splitting work into commits |
 | [senior-technical-writer](skills/senior-technical-writer/SKILL.md) | Writing and reviewing docs against the code they describe                                  |
+| [testing](skills/testing/SKILL.md)                                 | Choosing a test layer and writing tests that can fail                                      |
 
 ## Versions
 
