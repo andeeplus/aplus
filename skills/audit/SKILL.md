@@ -59,8 +59,15 @@ Write nothing until scope and posture are confirmed.
 
 ## Phase 1: Audit
 
-- **First run:** write the files for the posture, starting `README.md` from [assets/readme.md](assets/readme.md).
-- **Another author's review:** one file, `review-{author-slug}.md`, from [assets/review.md](assets/review.md). Do not rewrite the first run's files.
+Create the files with [scripts/new-audit.mts](scripts/new-audit.mts), then fill them in. It writes the date folder, fills the templates in [assets/](assets/), and stops when `.audit/` is not gitignored. Never create them by hand.
+
+```sh
+node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <scope-slug> --author <author-slug> --model <model> [--posture strict|balanced]
+node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <scope-slug> --author <author-slug> --model <model> --review
+```
+
+- **First run:** the command without `--review` writes the files for the posture.
+- **Another author's review:** `--review` adds `review-{author-slug}.md`. Do not rewrite the first run's files.
 - **Cross-audit:** the first author writes the full set. Each further author writes only `review-{author-slug}.md` from the same template, without reading the first author's files until their own findings are written. Once every author's file exists, write `synthesis.md` before drafting issues.
 
 ## Phase 2: Issues (on request)
