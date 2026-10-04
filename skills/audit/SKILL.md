@@ -11,10 +11,10 @@ Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). G
 
 ## Posture
 
-| Posture            | Standard                                                                                                                                                                                                                                            | Files                  |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `strict` (default) | Apply [the code-quality lens](../final-review/references/code-quality.md) in full. It is written for a branch diff: treat the audited area as the change, and skip its rules about what a single PR adds, such as a file growing past a line limit. | All four               |
-| `balanced`         | Real bugs and structural regressions only. Mention simplifications briefly, and push for a large refactor only when the path is obvious. Skip legibility nits.                                                                                      | `README.md`, `bugs.md` |
+| Posture            | Standard                                                                                                                                                                                                                 | Files                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| `strict` (default) | Apply [code-quality](../code-quality/SKILL.md) in full. It is written for a branch diff: treat the audited area as the change, and skip its rules about what a single PR adds, such as a file growing past a line limit. | All four               |
+| `balanced`         | Real bugs and structural regressions only. Mention simplifications briefly, and push for a large refactor only when the path is obvious. Skip legibility nits.                                                           | `README.md`, `bugs.md` |
 
 ## Fix philosophy
 

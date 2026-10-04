@@ -1,8 +1,8 @@
 ---
-name: thermo-nuclear-code-quality-review
+name: code-quality
 description: Run an extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Use for a thermo-nuclear code quality review, thermonuclear review, deep code quality audit, or especially harsh maintainability review.
 disable-model-invocation: true
-license: MIT (see code-quality.LICENSE)
+license: MIT (see LICENSE)
 metadata:
     author: cursor
     source: https://github.com/cursor/plugins/blob/6e3d2ea56d7d446b955eaae6ac4c8eef8bf504cf/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md
