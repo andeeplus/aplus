@@ -18,6 +18,12 @@ A scenario is one concrete example of one behaviour, in the project's own words:
 - **Steps** are third person, present tense, one fact each. `And` continues the phase above it; `But` marks a contrast.
 - **Short:** under ten steps. A list of inputs is a table.
 
+## References
+
+| Task                                                                                     | Read                                                       |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| A `.feature` file: layout, Background, Rule, Scenario Outline, tables, doc strings, tags | [references/feature-files.md](references/feature-files.md) |
+
 ## A bug's scenario
 
 It states the correct behaviour, so it fails today. Put it in a `gherkin` code block in the issue's expected-behaviour or acceptance section, and keep the actual behaviour in prose beside it. The regression test implements it ([testing](../testing/SKILL.md)).
@@ -29,9 +35,3 @@ Scenario: Exporting again rebuilds the pages that import a changed module
   When the site is exported again
   Then the exported "/" and "/about" show the new navigation
 ```
-
-## More
-
-| Task                                                                                     | Read                                                       |
-| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| A `.feature` file: layout, Background, Rule, Scenario Outline, tables, doc strings, tags | [references/feature-files.md](references/feature-files.md) |

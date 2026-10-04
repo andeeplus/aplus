@@ -1,6 +1,6 @@
 ---
 name: github
-description: Every GitHub action through the gh CLI, following the repository's own schema in .github/. Use to create issues from draft files (validated by a script, never by hand), edit and close issues, push and open pull requests, create and update stacks with gh-stack, read CI checks and review comments, reply to a review, and merge.
+description: Run GitHub work through gh, following the project's schema in .github/. Use to create issues from drafts, edit and close issues, open PRs and stacks (gh-stack), read checks and reviews, reply to a review, and merge.
 ---
 
 # GitHub
@@ -11,13 +11,13 @@ Every agent does GitHub work the same way: formats come from the repository's `.
 
 ## Rules
 
-- **Ask first.** Pushing, creating or editing issues and PRs, commenting and merging all publish to a shared repository. Do them only after the user approves, unless they asked for that exact action.
+- **Ask before you publish,** unless the user asked for that exact action. Pushing, creating or editing issues and PRs, commenting and merging all publish.
 - **Issues come from draft files.** Write a draft and run the issue script below. Never call `gh issue create` by hand: the script validates the draft against the issue forms and labels, then sets the type, labels, milestone, parent and "blocked by" links.
 - **The schema is in `.github/`.** The forms in `.github/ISSUE_TEMPLATE/` define each kind of issue and its sections. `.github/labels.yml`, when present, lists the allowed labels. `.github/pull_request_template.md` is the PR body. Read them; do not restate them.
-- **Keep scratch files out of the tree.** Write drafts and PR bodies to a temp or gitignored folder so they are never committed.
+- **Use scratch files** outside the tree for drafts and PR bodies, so they are never committed.
 - **Never** put a token on the command line, force-push the integration branch or someone else's branch, or link a local or gitignored file from an issue or PR. Stack branches are rewritten only through `gh stack`, which pushes with `--force-with-lease`.
 
-## Load what the task needs
+## References
 
 | Task                                                                          | Read                                         |
 | ----------------------------------------------------------------------------- | -------------------------------------------- |
@@ -25,7 +25,7 @@ Every agent does GitHub work the same way: formats come from the repository's `.
 | The issue draft format; create issues with the script                         | [references/issues.md](references/issues.md) |
 | Create, change or merge a stack of pull requests                              | [references/stacks.md](references/stacks.md) |
 
-## Issue script
+## Script
 
 [scripts/create-issues.mts](scripts/create-issues.mts) validates drafts and, with `--apply`, creates them. Run it from inside the repository with Node 22.6 or later, or through the project's alias when it has one:
 

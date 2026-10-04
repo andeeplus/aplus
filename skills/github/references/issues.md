@@ -35,7 +35,7 @@ milestone: <an existing milestone>
 
 ## Create
 
-`<issue script>` is the command in [the skill's Issue script section](../SKILL.md#issue-script).
+`<issue script>` is the command in [the skill's Script section](../SKILL.md#script).
 
 Look for a duplicate first ([cli.md: Issues](cli.md#issues)). Then:
 

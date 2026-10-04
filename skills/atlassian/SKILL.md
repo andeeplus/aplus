@@ -1,6 +1,6 @@
 ---
 name: atlassian
-description: Bitbucket Cloud, Jira and Confluence through atlassian-cli. Use for Bitbucket pull requests, stacks, pipelines and merges; Jira issues, links, comments and transitions; Confluence pages for concepts, specs, ADRs and RFCs; and setting up the CLI and its tokens.
+description: Run Bitbucket Cloud, Jira and Confluence work through atlassian-cli. Use for Bitbucket PRs, stacks, pipelines and merges; Jira issues, links, comments and transitions; Confluence pages for specs and ADRs; and CLI setup.
 ---
 
 # Atlassian
@@ -11,11 +11,11 @@ Every product goes through [atlassian-cli](https://github.com/omar16100/atlassia
 
 ## Rules
 
-- **Ask first.** Pushing, creating or editing PRs, issues, pages and comments, transitions and merging all publish. Do them only after the user approves, unless they asked for that exact action.
-- **Tokens** stay in the CLI's stored profile or an environment variable.
-- **Scratch files** (PR descriptions, issue and page bodies) go outside the tree.
+- **Ask before you publish,** unless the user asked for that exact action. Pushing, creating or editing PRs, issues, pages and comments, transitions and merging all publish.
+- **Keep tokens** in the CLI's stored profile or an environment variable.
+- **Use scratch files** outside the tree for PR descriptions and issue and page bodies, so they are never committed.
 
-## Load what the task needs
+## References
 
 | Task                                                      | Read                                                 |
 | --------------------------------------------------------- | ---------------------------------------------------- |
@@ -24,7 +24,7 @@ Every product goes through [atlassian-cli](https://github.com/omar16100/atlassia
 | Jira issues: draft, create, link, comment, transition     | [references/jira.md](references/jira.md)             |
 | Confluence pages: concepts, specs, ADRs, RFCs             | [references/confluence.md](references/confluence.md) |
 
-## Issue script
+## Script
 
 [scripts/create-issues.mts](scripts/create-issues.mts) validates Jira drafts and, with `--apply`, creates and links them. Run it with Node 22.6 or later:
 

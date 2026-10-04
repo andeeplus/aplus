@@ -1,13 +1,19 @@
 ---
 name: audit
-description: Audit a codebase area's design and defects, write the findings under .audit/, turn them into GitHub issues, and carry the resulting refactor program through to merged PRs. Use to audit or review an area's design, plan a refactor program, file issues from audit findings, execute an audit's issues, or add another author's review to an existing audit in .audit/.
+description: Audit a codebase area's design and defects into local notes, file the findings as issues, and carry the refactor program to merged PRs. Use to audit an area, plan a refactor program, file issues from audit findings, execute an audit's issues, or add another author's review to an existing audit.
 ---
 
 # Audit
 
-**clarify → audit → issues (on request) → execute (on request) → final-review → PR → handoff**
+**clarify → audit → issues (on request) → execute (on request) → ship → hand off**
 
-Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). GitHub issues are the plan: the audit is local working notes, and anything that must outlive it becomes an issue.
+Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). Issues on the project's tracker are the plan: the audit is local working notes, and anything that must outlive it becomes an issue.
+
+## Rules
+
+- **Correct over convenient.** Choose the long-term right fix. No workarounds, stubs, or docs that paper over a bad contract.
+- **Fix on the branch.** If the durable fix fits the issue's scope, implement it. Do not leave findings as comments or TODOs.
+- **Push for truth.** Types, tests, runtime behaviour and docs must agree.
 
 ## Posture
 
@@ -16,13 +22,7 @@ Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). G
 | `strict` (default) | Apply [code-quality](../code-quality/SKILL.md) in full. It is written for a branch diff: treat the audited area as the change, and skip its rules about what a single PR adds, such as a file growing past a line limit. | All four               |
 | `balanced`         | Real bugs and structural regressions only. Mention simplifications briefly, and push for a large refactor only when the path is obvious. Skip legibility nits.                                                           | `README.md`, `bugs.md` |
 
-## Fix philosophy
-
-- **Correct over convenient.** Choose the long-term right fix. No workarounds, stubs, or docs that paper over a bad contract.
-- **Fix on the branch.** If the durable fix fits the issue's scope, implement it. Do not leave findings as comments or TODOs.
-- **Push for truth.** Types, tests, runtime behaviour and docs must agree.
-
-## Output
+## Files
 
 Artifacts go under `.audit/`. Check that it is gitignored; if it is not, ask before adding it to `.gitignore`.
 
@@ -43,7 +43,7 @@ Artifacts go under `.audit/`. Check that it is gitignored; if it is not, ask bef
 - **Author slug:** kebab-case, such as `claude-opus`.
 - **Keys** are short and stable (`B1`, `T2`, `M3`); issue drafts reuse them.
 
-## Phase 0: Clarify
+## Clarify
 
 Ask the open questions in one round; skip what the request already answers.
 
@@ -57,7 +57,7 @@ Ask the open questions in one round; skip what the request already answers.
 
 Write nothing until scope and posture are confirmed.
 
-## Phase 1: Audit
+## Audit
 
 Create the files with [scripts/new-audit.mts](scripts/new-audit.mts), then fill them in. It writes the date folder, fills the templates in [assets/](assets/), and stops when `.audit/` is not gitignored. Never create them by hand.
 
@@ -70,7 +70,7 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <sco
 - **Another author's review:** `--review` adds `review-{author-slug}.md`. Do not rewrite the first run's files.
 - **Cross-audit:** the first author writes the full set. Each further author writes only `review-{author-slug}.md` from the same template, without reading the first author's files until their own findings are written. Once every author's file exists, write `synthesis.md` before drafting issues.
 
-## Phase 2: Issues (on request)
+## Issues (on request)
 
 1. Draft one file per issue in `issues/` with [create-issue](../create-issue/SKILL.md):
 
@@ -85,13 +85,13 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <sco
 
 2. Create them as create-issue says: duplicate check, show the user, create only after they confirm.
 
-## Phase 3: Execute (on request)
+## Execute (on request)
 
 Work from the program's open change issues in "blocked by" order; as [create-issue: programs](../create-issue/references/programs.md) describes. Skip a decision issue, and anything it blocks, until a maintainer has answered it; never pick an option yourself.
 
 Use one branch and one PR per issue: from the integration branch, or stacked on the blocker's PR while it is open, as [create-pr: stacks](../create-pr/references/stacks.md) says. Name branches with no audit keys.
 
-## Phase 4: Before each PR
+## Ship
 
 1. Run [final-review](../final-review/SKILL.md).
 2. Triage what it leaves:
@@ -109,9 +109,9 @@ Use one branch and one PR per issue: from the integration branch, or stacked on 
 
 **Gate:** no PR without a `ready to ship` verdict, and none while a deferred finding has no issue.
 
-## Phase 5: Handoff
+## Hand off
 
-The program is done when every change sub-issue is closed; GitHub does not close the tracking issue by itself. When it is done, or the user stops:
+The program is done when every change sub-issue is closed; the tracker may not close the tracking issue by itself. When it is done, or the user stops:
 
 1. Summarize what shipped: PRs merged, issues closed, key outcomes.
 2. List the open decisions and any spawned audits not yet started.

@@ -1,6 +1,6 @@
 ---
 name: final-review
-description: Ship gate for a finished change. Runs the project's checks, then three parallel reviews (tests, code quality, documentation), fixes the easy findings once, re-checks, asks another model for a second review when one is configured, and ends with an explicit "ready to ship" or "not ready" verdict. Use for a final review, to ask whether work is ready to ship, to run the gates, or before committing or opening a pull request.
+description: Ship gate for a finished change, with the project's checks, three parallel reviews, one fix round, a second opinion, and a verdict of ready to ship or not ready. Use for a final review, to run the gates, to ask whether work is ready to ship, or before a commit or PR.
 ---
 
 # Final review

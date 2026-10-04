@@ -5,7 +5,23 @@ description: Open a pull request the project's way, on any host. Use to open a P
 
 # Create PR
 
-Commands and formats come from the skill for the repository's host, such as [github](../github/SKILL.md). The integration branch, merge method and release-note rules come from the project's `AGENTS.md`.
+A PR opens only on a `ready to ship` verdict, and merges only when the user asks.
+
+Commands and formats come from the skill for the project's host, such as [github](../github/SKILL.md).
+
+**Project specifics** (the integration branch, the merge method, release-note rules, whether work needs an issue) come from the project's `AGENTS.md` and the project skill it names.
+
+## Rules
+
+- **One PR per issue,** on a kebab-case branch named type, issue, then slug, such as `fix/12-stale-export-pages`. Every commit on it names the issue in a `Refs:` footer, as [commit-expert](../commit-expert/SKILL.md) says; the host skill gives the issue's form.
+- **Without an issue,** where the project allows it, use a `type/slug` branch and no footer.
+
+## References
+
+| Task                                                              | Read                                                             |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------- |
+| The issue is blocked by one whose PR is open; split finished work | [references/stacks.md](references/stacks.md)                     |
+| Answer a review, merge, close the issues                          | [references/review-and-merge.md](references/review-and-merge.md) |
 
 ## Open
 
@@ -13,12 +29,3 @@ Commands and formats come from the skill for the repository's host, such as [git
 2. Write the title, and the release note the project requires, with [commit-expert](../commit-expert/SKILL.md).
 3. Fill in the project's PR template in a scratch file outside the tree. Link each issue the PR resolves.
 4. Ask, then push and open it against the integration branch.
-
-Prefer one PR per issue, on a kebab-case branch named type, issue, then slug, such as `fix/12-stale-export-pages`. Every commit on it names the issue in a `Refs:` footer, as [commit-expert](../commit-expert/SKILL.md) says. The host skill gives the issue's form. Whether an issue is required comes from the project's `AGENTS.md`; where none is, work without one goes on `type/slug` with no footer.
-
-## More
-
-| Task                                                              | Read                                                             |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------- |
-| The issue is blocked by one whose PR is open; split finished work | [references/stacks.md](references/stacks.md)                     |
-| Answer a review, merge, close the issues                          | [references/review-and-merge.md](references/review-and-merge.md) |

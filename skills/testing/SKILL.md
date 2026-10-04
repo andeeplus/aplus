@@ -1,6 +1,6 @@
 ---
 name: testing
-description: Use when writing, generating or reviewing automated tests, choosing which layer a test belongs in (unit, DOM, runtime-specific, end-to-end, benchmark), or rejecting a test that cannot fail. Includes Vitest and Playwright notes.
+description: Write, review and place automated tests that can fail. Use for writing, generating or reviewing tests, choosing a layer (unit, DOM, runtime-specific, end-to-end, benchmark), or rejecting a test that cannot fail. Covers Vitest and Playwright.
 ---
 
 # Testing
@@ -9,7 +9,7 @@ A test exists to catch a behaviour change someone would care about. A test that 
 
 **Project specifics** (test layers, commands, where files go, shared fixtures) come from the project's `AGENTS.md` and the project skill it names, then from the test config. Match the nearest existing test in the same package, and use the project's domain terms.
 
-## Load what the task needs
+## References
 
 | Task                                                             | Read                                                                         |
 | ---------------------------------------------------------------- | ---------------------------------------------------------------------------- |
