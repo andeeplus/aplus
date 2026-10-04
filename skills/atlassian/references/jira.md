@@ -2,9 +2,18 @@
 
 ## The draft
 
-`--description` takes Markdown and converts it to Jira's format, code blocks included. Use the project's issue types (a bug, a task, an epic for a program) and the sections its project skill lists, as `##` headings. A bug's Gherkin scenario goes in a `gherkin` code block.
+The format is [the GitHub draft format](../../github/references/issues.md#the-draft), with `template` set to the Jira issue type (such as Bug, Task or Epic), no `milestone`, and a free Markdown body: `##` headings, code blocks, and a bug's Gherkin scenario in a `gherkin` block. Use the sections the project skill lists.
 
-## Commands
+## Create
+
+```sh
+<issue script> path/to/folder                 # validate against the project's issue types and required fields
+<issue script> path/to/folder --apply         # create in dependency order (ask the user first)
+```
+
+It creates parents before children and blockers first, reads each "blocks" link back and corrects an inverted one, and records `key → Jira key` in `manifest.json` beside the drafts, so a re-run creates only what is missing. A project that requires a custom field is rejected: create that issue with the commands below and `--field`.
+
+## Other commands
 
 ```sh
 atlassian-cli -f json jira issue search --jql 'project = <P> AND text ~ "<key words>"'   # look for a duplicate

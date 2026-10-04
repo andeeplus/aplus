@@ -23,3 +23,13 @@ Every product goes through [atlassian-cli](https://github.com/omar16100/atlassia
 | Pull requests, stacks, reviews, pipelines, merging        | [references/bitbucket.md](references/bitbucket.md)   |
 | Jira issues: draft, create, link, comment, transition     | [references/jira.md](references/jira.md)             |
 | Confluence pages: concepts, specs, ADRs, RFCs             | [references/confluence.md](references/confluence.md) |
+
+## Issue script
+
+[scripts/create-issues.mts](scripts/create-issues.mts) validates Jira drafts and, with `--apply`, creates and links them. Run it with Node 22.6 or later:
+
+```sh
+node --experimental-strip-types <this skill's folder>/scripts/create-issues.mts <file.md | folder> --project <KEY> [--apply]
+```
+
+Without `--apply` it only validates and prints what it would create. `<issue script>` in the references means this command.
