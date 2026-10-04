@@ -19,7 +19,14 @@ Write short, precise engineering-facing messages: commit messages, PR titles, ch
 
 ## Rules
 
-- One line unless the user asks for a body.
+- One line unless the user asks for a body. When the work has an issue, add a `Refs:` footer naming it in the host's form, so the host links the commit to the issue:
+
+    ```text
+    fix(router): restore scroll position on back navigation
+
+    Refs: #12
+    ```
+
 - Describe the outcome, not the process.
 - Name the concrete module, API or boundary that changed, not a vague area.
 - No filler, no marketing language, no preamble such as "Here is your commit message".

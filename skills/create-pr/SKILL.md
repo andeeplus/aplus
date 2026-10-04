@@ -14,7 +14,7 @@ Commands and formats come from the skill for the repository's host, such as [git
 3. Fill in the project's PR template in a scratch file outside the tree. Link each issue the PR resolves.
 4. Ask, then push and open it against the integration branch.
 
-One PR per issue, on a kebab-case branch with a type prefix, such as `fix/stale-export-pages`.
+Prefer one PR per issue, on a kebab-case branch named type, issue, then slug, such as `fix/12-stale-export-pages`. Every commit on it names the issue in a `Refs:` footer, as [commit-expert](../commit-expert/SKILL.md) says. The host skill gives the issue's form. Whether an issue is required comes from the project's `AGENTS.md`; where none is, work without one goes on `type/slug` with no footer.
 
 ## More
 
