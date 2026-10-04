@@ -43,6 +43,7 @@ The skills are generic: they never name a project's commands, branches or paths.
 | [commit-expert](skills/commit-expert/SKILL.md)                     | Commit messages, PR titles, changelog lines and release notes; splitting work into commits               |
 | [senior-technical-writer](skills/senior-technical-writer/SKILL.md) | Writing and reviewing docs against the code they describe                                                |
 | [testing](skills/testing/SKILL.md)                                 | Choosing a test layer and writing tests that can fail                                                    |
+| [gherkin](skills/gherkin/SKILL.md)                                 | Given/When/Then scenarios: every bug's expected behaviour, acceptance criteria, Cucumber feature files   |
 | [second-opinion](skills/second-opinion/SKILL.md)                   | A different agent and model reviews a finished change, read-only, in at most two rounds                  |
 | [final-review](skills/final-review/SKILL.md)                       | Ship gate: checks, three parallel reviews, one fix round, a second opinion, a ready or not-ready verdict |
 | [create-issue](skills/create-issue/SKILL.md)                       | Issues that stand alone: duplicate check, problem and evidence first, programs of ordered issues         |

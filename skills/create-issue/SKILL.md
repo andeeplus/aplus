@@ -18,7 +18,7 @@ The draft format, commands and creation script come from the skill for the proje
 - Lead with the problem in this repository and its evidence.
 - Link code at a commit, never a branch.
 - How another project handles the same thing may be cited as fact, never as the reason. Do not frame the work as copying it, or as an audit's output.
-- A bug's acceptance is the regression test that fails today.
+- A bug states the correct behaviour as a [Gherkin scenario](../gherkin/SKILL.md#a-bugs-scenario), which fails today. Its acceptance is the regression test that implements it.
 - The issue stands alone: no local or gitignored paths, no internal ids such as audit keys.
 
 ## More

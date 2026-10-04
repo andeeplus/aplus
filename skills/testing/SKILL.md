@@ -55,6 +55,8 @@ One non-trivial branch, loop, parser or trust boundary needs **one** test that f
 
 **Test-only API is dead API.** Do not add an exported setter, a getter, a counter or a flag that exposes internal state so a test can reach in. If only a test calls a symbol, delete both. A parameter that replaces a process boundary (a clock, a runtime, a filesystem) is a seam, not test-only API.
 
+**A bug's scenario is its test.** When a bug has a [Gherkin scenario](../gherkin/SKILL.md), the regression test implements it: Given, When and Then become arrange, act and assert, and the test takes the scenario's title.
+
 **A test can pin a bug.** When a test contradicts the documented contract, fix the test and say so in the PR. Never bend correct code to keep a test green.
 
 ## Tautology (reject these)
