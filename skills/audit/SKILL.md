@@ -83,7 +83,7 @@ Write nothing until scope and posture are confirmed.
 
 Work from the program's open change issues in "blocked by" order; [github: Programs](../github/references/issues.md#programs) shows how to read them. Skip a decision issue, and anything it blocks, until a maintainer has answered it; never pick an option yourself.
 
-Use one branch and one PR per issue: from the integration branch, or stacked on the blocker's PR while it is open, as [github: Split and stack](../github/references/pull-requests.md#split-and-stack) says. Name branches with no audit keys.
+Use one branch and one PR per issue: from the integration branch, or stacked on the blocker's PR while it is open, as [create-pr: stacks](../create-pr/references/stacks.md) says. Name branches with no audit keys.
 
 ## Phase 4: Before each PR
 
@@ -99,7 +99,7 @@ Use one branch and one PR per issue: from the integration branch, or stacked on 
     | `nit`                                    | List it in the PR body.                                                                                                                |
 
 3. Run final-review again. Its verdict now counts the issues you filed; continue only on `ready to ship`.
-4. Commit with [commit-expert](../commit-expert/SKILL.md). Push and open the PR with [github](../github/references/pull-requests.md), asking first. Keep audit keys and `.audit/` paths out of branch names, titles and bodies.
+4. Commit with [commit-expert](../commit-expert/SKILL.md). Open the PR with [create-pr](../create-pr/SKILL.md), asking first. Keep audit keys and `.audit/` paths out of branch names, titles and bodies.
 
 **Gate:** no PR without a `ready to ship` verdict, and none while a deferred finding has no issue.
 

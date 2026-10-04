@@ -57,7 +57,7 @@ The script records `key → issue number` in `manifest.json` beside the drafts. 
 A program is one tracking issue plus one sub-issue per change.
 
 - Draft the tracking issue: its goal, its scope and non-goals, and when it is done.
-- Give each change `parent: <tracking key>`, and order the changes with `blockedBy`. A blocked change's PR stacks on its blocker's PR ([pull-requests.md](pull-requests.md#split-and-stack)).
+- Give each change `parent: <tracking key>`, and order the changes with `blockedBy`. A blocked change's PR stacks on its blocker's PR ([create-pr: stacks](../../create-pr/references/stacks.md)).
 - A question a maintainer must answer first is its own issue (the decision form, when the project has one), with a parent when it belongs to a program.
 
 [cli.md: Issues](cli.md#issues) reads a program's state.
@@ -65,4 +65,4 @@ A program is one tracking issue plus one sub-issue per change.
 ## After creation
 
 - **Edit** the type, labels, milestone, parent or "blocked by" links with [cli.md: Issues](cli.md#issues).
-- **Close:** let the merged PR close it ([pull-requests.md](pull-requests.md#after-opening)). Close by hand only for won't-fix or a duplicate, with the reason.
+- **Close:** let the merged PR close it ([create-pr: review and merge](../../create-pr/references/review-and-merge.md)). Close by hand only for won't-fix or a duplicate, with the reason.
