@@ -1,6 +1,7 @@
 /**
  * Checks every skill: `SKILL.md` has a `name` equal to its folder and a `description`, and every relative
- * Markdown link in `skills/`, `README.md` and `AGENTS.md` resolves, anchors included.
+ * Markdown link in `skills/`, `README.md` and `AGENTS.md` resolves, anchors included. Files in `assets/` are
+ * templates that link relative to where they are copied, so they are skipped.
  *
  * Usage: node --experimental-strip-types scripts/check-skills.mts
  */
@@ -26,10 +27,18 @@ export function anchors(source: string): string[] {
 		.map((line) => slug(line.replace(/^#+ /, '')));
 }
 
+/** Like `existsSync`, but exact about letter case, so a link that works on macOS but not on Linux fails. */
+function existsExact(file: string): boolean {
+	return (
+		existsSync(file) &&
+		(file === path.parse(file).root || readdirSync(path.dirname(file)).includes(path.basename(file)))
+	);
+}
+
 export function linkErrors(
 	file: string,
 	source: string,
-	exists: (file: string) => boolean = existsSync,
+	exists: (file: string) => boolean = existsExact,
 	read = (f: string) => readFileSync(f, 'utf8'),
 ) {
 	const errors: string[] = [];
@@ -55,7 +64,7 @@ export function frontmatterErrors(folder: string, source: string): string[] {
 function markdownFiles(dir: string): string[] {
 	return readdirSync(dir).flatMap((entry) => {
 		const full = path.join(dir, entry);
-		if (statSync(full).isDirectory()) return markdownFiles(full);
+		if (statSync(full).isDirectory()) return entry === 'assets' ? [] : markdownFiles(full);
 		return full.endsWith('.md') ? [full] : [];
 	});
 }
