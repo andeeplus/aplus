@@ -24,6 +24,7 @@ Inside a skill, progressive disclosure keeps what an agent loads small:
 - **Generic.** A skill names no project, command, branch or path. For those it defers to the project's `AGENTS.md` and the project skill it names. A workflow skill names no host or tracker either: it defers to the platform skill, such as `github`.
 - **Script it.** If two agents could do a step differently, write a script and make `SKILL.md` say to run it. Never reimplement a script's job by hand.
 - **Schemas live in the project.** Issue forms, labels and the pull request template are in the project's `.github/`. Skills read them; they do not restate them.
+- **Current only.** Skills, docs and commit messages describe what is supported now. Leave out what was renamed, replaced, deprecated or removed, and its old names.
 - **Say what to do.** Describe the supported path. Do not describe an action a skill does not support, even to forbid it: naming it suggests it.
 - **Link, don't copy.** Skills link to each other with relative paths, such as `../final-review/SKILL.md`.
 - **Vendored files** keep their license beside them and a link to their source.
