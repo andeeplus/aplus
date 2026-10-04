@@ -1,5 +1,6 @@
 /**
- * Checks every skill: `SKILL.md` has a `name` equal to its folder and a `description`, and every relative
+ * Checks every skill: `SKILL.md` has a `name` equal to its folder and a `description`, a skill that is not vendored
+ * (no `LICENSE` beside it) follows the shape in AGENTS.md, and every relative
  * Markdown link in `skills/`, `README.md` and `AGENTS.md` resolves, anchors included. Files in `assets/` are
  * templates that link relative to where they are copied, so they are skipped.
  *
@@ -58,6 +59,35 @@ export function frontmatterErrors(folder: string, source: string): string[] {
 	const errors = [];
 	if (name !== folder) errors.push(`skills/${folder}/SKILL.md: name is "${name}", expected "${folder}"`);
 	if (!/^description:[ \t]*\S/m.test(front)) errors.push(`skills/${folder}/SKILL.md: missing description`);
+	// A plain YAML value ends at ": " or " #", so a strict parser rejects the whole frontmatter and drops the skill.
+	for (const [, key, value] of front.matchAll(/^([\w-]+):[ \t]*([^'"|>\s].*)$/gm)) {
+		if (/: | #/.test(value))
+			errors.push(`skills/${folder}/SKILL.md: ${key} has ": " or " #"; reword it or quote it`);
+	}
+	return errors;
+}
+
+const SECTIONS = ['Rules', 'References', 'Script', 'Flow', 'Output'];
+
+/** The shape AGENTS.md sets: a description with a `Use` sentence, and the shared sections in their order. */
+export function shapeErrors(folder: string, source: string): string[] {
+	const file = `skills/${folder}/SKILL.md`;
+	const errors = [];
+	const description = /^description:[ \t]*(.*)$/m.exec(source)?.[1] ?? '';
+	if (!/(^|\. )Use /.test(description)) errors.push(`${file}: description has no sentence starting "Use"`);
+	const order = source
+		.replace(FENCED, '')
+		.split('\n')
+		.filter((line) => line.startsWith('## '))
+		.map((line) => SECTIONS.indexOf(line.slice(3).trim()))
+		.filter((index) => index !== -1);
+	for (let i = 1; i < order.length; i++) {
+		if (order[i] <= order[i - 1]) {
+			errors.push(
+				`${file}: "## ${SECTIONS[order[i]]}" comes after "## ${SECTIONS[order[i - 1]]}"; the order is ${SECTIONS.join(', ')}`,
+			);
+		}
+	}
 	return errors;
 }
 
@@ -72,9 +102,11 @@ function markdownFiles(dir: string): string[] {
 if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
 	const skillsDir = path.join(root, 'skills');
 	const errors = [
-		...readdirSync(skillsDir).flatMap((folder) =>
-			frontmatterErrors(folder, readFileSync(path.join(skillsDir, folder, 'SKILL.md'), 'utf8')),
-		),
+		...readdirSync(skillsDir).flatMap((folder) => {
+			const source = readFileSync(path.join(skillsDir, folder, 'SKILL.md'), 'utf8');
+			const vendored = existsSync(path.join(skillsDir, folder, 'LICENSE'));
+			return [...frontmatterErrors(folder, source), ...(vendored ? [] : shapeErrors(folder, source))];
+		}),
 		...[...markdownFiles(skillsDir), path.join(root, 'README.md'), path.join(root, 'AGENTS.md')].flatMap((file) =>
 			linkErrors(file, readFileSync(file, 'utf8')),
 		),
