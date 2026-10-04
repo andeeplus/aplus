@@ -5,7 +5,7 @@ description: Triage incoming GitHub issues. Reads the whole thread, checks for d
 
 # Triage
 
-Turn a new issue into a decision the maintainer approves: what it is, how severe it is, and what happens next. Triage recommends and waits. It does not fix code, and every write to GitHub goes through [github-cli](../github-cli/SKILL.md) after the user approves it.
+Turn a new issue into a decision the maintainer approves: what it is, how severe it is, and what happens next. Triage recommends and waits. It does not fix code, and every write to GitHub goes through [github](../github/SKILL.md) after the user approves it.
 
 **Project specifics** come from the project's `AGENTS.md` and the project skill it names: the labels file and issue forms (usually in `.github/`), the supported versions and runtimes, how to set up a reproduction, and where the docs live.
 
@@ -24,6 +24,6 @@ Turn a new issue into a decision the maintainer approves: what it is, how severe
 2. **Read.** `gh issue view <n> --comments --json title,body,author,issueType,labels,comments,closedByPullRequestsReferences`. When a linked pull request or a person already owns the fix, stop and say so.
 3. **Investigate** with [references/investigate.md](references/investigate.md): duplicates, missing details, reproduction, bug or intended, area and severity.
 4. **Recommend** in the format of [references/recommend.md](references/recommend.md), then stop.
-5. **Apply** what the user approved, through github-cli: the issue type (`gh issue edit <n> --type <name>`), labels, the comment, closing as a duplicate or as not planned, or a follow-up issue such as a decision.
+5. **Apply** what the user approved, through github: the issue type (`gh issue edit <n> --type <name>`), labels, the comment, closing as a duplicate or as not planned, or a follow-up issue such as a decision.
 
 Triage ends at the decision. Fixing a confirmed bug is separate work.

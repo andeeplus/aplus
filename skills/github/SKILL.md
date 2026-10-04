@@ -1,11 +1,11 @@
 ---
-name: github-cli
-description: Every GitHub action through the gh CLI, following the repository's own schema in .github/. Use to create issues from draft files (validated by a script, never by hand), plan a program of issues, open and stack pull requests, read CI checks and review comments, answer a review, merge, and close issues.
+name: github
+description: Every GitHub action through the gh CLI, following the repository's own schema in .github/. Use to create issues from draft files (validated by a script, never by hand), edit and close issues, push and open pull requests, create and update stacks with gh-stack, read CI checks and review comments, reply to a review, and merge.
 ---
 
-# GitHub CLI
+# GitHub
 
-Every agent does GitHub work the same way: formats come from the repository's `.github/` folder, steps from the files below. Do not improvise a format, label or command they already define.
+Every agent does GitHub work the same way: formats come from the repository's `.github/` folder, commands from the files below. Do not improvise a format, label or command they already define.
 
 **Project specifics** (the integration branch, the merge method, milestone and label conventions, an alias for the issue script) come from the project's `AGENTS.md` and the project skill it names. If neither says, the integration branch is the default branch: `gh repo view --json defaultBranchRef`.
 
@@ -19,11 +19,12 @@ Every agent does GitHub work the same way: formats come from the repository's `.
 
 ## Load what the task needs
 
-| Task                                                                                | Read                                                                 |
-| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Create one or many issues, a tracking program or a decision; read a program's state | [references/issues.md](references/issues.md)                         |
-| Split work, push, open a PR, create or update a stack, merge, close the issues      | [references/pull-requests.md](references/pull-requests.md)           |
-| Read CI results, failed logs, review comments; answer a review                      | [references/checks-and-reviews.md](references/checks-and-reviews.md) |
+| Task                                                                            | Read                                                       |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Any `gh` command: issues, pull requests, CI results, review comments, merging   | [references/cli.md](references/cli.md)                     |
+| Write issue drafts; create one or many issues, a tracking program or a decision | [references/issues.md](references/issues.md)               |
+| Split work, open a PR, answer a review, merge, close the issues                 | [references/pull-requests.md](references/pull-requests.md) |
+| Create, change or merge a stack of pull requests                                | [references/stacks.md](references/stacks.md)               |
 
 ## Issue script
 

@@ -65,7 +65,7 @@ Write nothing until scope and posture are confirmed.
 
 ## Phase 2: Issues (on request)
 
-1. Load [github-cli](../github-cli/SKILL.md) for its rules and the issue script. Draft one file per issue in `issues/`, in its [draft format](../github-cli/references/issues.md#the-draft):
+1. Load [github](../github/SKILL.md) for its rules and the issue script. Draft one file per issue in `issues/`, in its [draft format](../github/references/issues.md#the-draft):
 
     | Source                            | Draft                             |
     | --------------------------------- | --------------------------------- |
@@ -76,14 +76,14 @@ Write nothing until scope and posture are confirmed.
 
     Use the closest form the project has for each kind. A balanced audit yields bugs and decisions only.
 
-2. Validate and show the user what would be created, following [github-cli: Create](../github-cli/references/issues.md#create), duplicate check included.
+2. Validate and show the user what would be created, following [github: Create](../github/references/issues.md#create), duplicate check included.
 3. Only after the user confirms, create them with `--apply`.
 
 ## Phase 3: Execute (on request)
 
-Work from the program's open change issues in "blocked by" order; [github-cli: Programs](../github-cli/references/issues.md#programs) shows how to read them. Skip a decision issue, and anything it blocks, until a maintainer has answered it; never pick an option yourself.
+Work from the program's open change issues in "blocked by" order; [github: Programs](../github/references/issues.md#programs) shows how to read them. Skip a decision issue, and anything it blocks, until a maintainer has answered it; never pick an option yourself.
 
-Use one branch and one PR per issue: from the integration branch, or stacked on the blocker's PR while it is open, as [github-cli: Split and stack](../github-cli/references/pull-requests.md#split-and-stack) says. Name branches with no audit keys.
+Use one branch and one PR per issue: from the integration branch, or stacked on the blocker's PR while it is open, as [github: Split and stack](../github/references/pull-requests.md#split-and-stack) says. Name branches with no audit keys.
 
 ## Phase 4: Before each PR
 
@@ -99,7 +99,7 @@ Use one branch and one PR per issue: from the integration branch, or stacked on 
     | `nit`                                    | List it in the PR body.                                                                                                                |
 
 3. Run final-review again. Its verdict now counts the issues you filed; continue only on `ready to ship`.
-4. Commit with [commit-expert](../commit-expert/SKILL.md). Push and open the PR with [github-cli](../github-cli/references/pull-requests.md), asking first. Keep audit keys and `.audit/` paths out of branch names, titles and bodies.
+4. Commit with [commit-expert](../commit-expert/SKILL.md). Push and open the PR with [github](../github/references/pull-requests.md), asking first. Keep audit keys and `.audit/` paths out of branch names, titles and bodies.
 
 **Gate:** no PR without a `ready to ship` verdict, and none while a deferred finding has no issue.
 
