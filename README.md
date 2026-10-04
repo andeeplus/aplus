@@ -47,6 +47,7 @@ The skills are generic: they never name a project's commands, branches or paths.
 | [final-review](skills/final-review/SKILL.md)                       | Ship gate: checks, three parallel reviews, one fix round, a second opinion, a ready or not-ready verdict |
 | [github-cli](skills/github-cli/SKILL.md)                           | Issues from validated draft files, pull requests and stacks with gh-stack, checks and reviews through gh |
 | [audit](skills/audit/SKILL.md)                                     | Audit an area into local notes, turn findings into issues, carry them through to merged PRs              |
+| [triage](skills/triage/SKILL.md)                                   | Triage incoming issues: duplicates, reproduction, bug or intended, and a recommendation to approve       |
 
 ## Versions
 
