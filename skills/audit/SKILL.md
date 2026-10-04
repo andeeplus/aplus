@@ -65,7 +65,7 @@ Write nothing until scope and posture are confirmed.
 
 ## Phase 2: Issues (on request)
 
-1. Load [github](../github/SKILL.md) for its rules and the issue script. Draft one file per issue in `issues/`, in its [draft format](../github/references/issues.md#the-draft):
+1. Draft one file per issue in `issues/` with [create-issue](../create-issue/SKILL.md):
 
     | Source                            | Draft                             |
     | --------------------------------- | --------------------------------- |
@@ -76,12 +76,11 @@ Write nothing until scope and posture are confirmed.
 
     Use the closest form the project has for each kind. A balanced audit yields bugs and decisions only.
 
-2. Validate and show the user what would be created, following [github: Create](../github/references/issues.md#create), duplicate check included.
-3. Only after the user confirms, create them with `--apply`.
+2. Create them as create-issue says: duplicate check, show the user, create only after they confirm.
 
 ## Phase 3: Execute (on request)
 
-Work from the program's open change issues in "blocked by" order; [github: Programs](../github/references/issues.md#programs) shows how to read them. Skip a decision issue, and anything it blocks, until a maintainer has answered it; never pick an option yourself.
+Work from the program's open change issues in "blocked by" order; as [create-issue: programs](../create-issue/references/programs.md) describes. Skip a decision issue, and anything it blocks, until a maintainer has answered it; never pick an option yourself.
 
 Use one branch and one PR per issue: from the integration branch, or stacked on the blocker's PR while it is open, as [create-pr: stacks](../create-pr/references/stacks.md) says. Name branches with no audit keys.
 

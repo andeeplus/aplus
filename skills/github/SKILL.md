@@ -5,7 +5,7 @@ description: Every GitHub action through the gh CLI, following the repository's 
 
 # GitHub
 
-Every agent does GitHub work the same way: formats come from the repository's `.github/` folder, commands from the files below. Do not improvise a format, label or command they already define. What to do and when comes from [create-pr](../create-pr/SKILL.md) for pull requests.
+Every agent does GitHub work the same way: formats come from the repository's `.github/` folder, commands from the files below. Do not improvise a format, label or command they already define. What to do and when comes from [create-issue](../create-issue/SKILL.md) and [create-pr](../create-pr/SKILL.md).
 
 **Project specifics** (the integration branch, the merge method, milestone and label conventions, an alias for the issue script) come from the project's `AGENTS.md` and the project skill it names. If neither says, the integration branch is the default branch: `gh repo view --json defaultBranchRef`.
 
@@ -19,11 +19,11 @@ Every agent does GitHub work the same way: formats come from the repository's `.
 
 ## Load what the task needs
 
-| Task                                                                            | Read                                         |
-| ------------------------------------------------------------------------------- | -------------------------------------------- |
-| Any `gh` command: issues, pull requests, CI results, review comments, merging   | [references/cli.md](references/cli.md)       |
-| Write issue drafts; create one or many issues, a tracking program or a decision | [references/issues.md](references/issues.md) |
-| Create, change or merge a stack of pull requests                                | [references/stacks.md](references/stacks.md) |
+| Task                                                                          | Read                                         |
+| ----------------------------------------------------------------------------- | -------------------------------------------- |
+| Any `gh` command: issues, pull requests, CI results, review comments, merging | [references/cli.md](references/cli.md)       |
+| The issue draft format; create issues with the script                         | [references/issues.md](references/issues.md) |
+| Create, change or merge a stack of pull requests                              | [references/stacks.md](references/stacks.md) |
 
 ## Issue script
 
