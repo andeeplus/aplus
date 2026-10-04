@@ -1,0 +1,19 @@
+{
+	"name": "aplus",
+	"version": "0.1.0",
+	"description": "Agent workflow for shipping changes: a ship gate, a second opinion from another model, codebase audits, issue-driven programs and stacked pull requests.",
+	"author": { "name": "Andrea Zanenghi", "url": "https://github.com/andeeplus" },
+	"homepage": "https://github.com/andeeplus/aplus",
+	"repository": "https://github.com/andeeplus/aplus",
+	"license": "MIT",
+	"keywords": ["review", "audit", "github", "stacked-prs", "testing", "workflow"],
+	"skills": "./skills/",
+	"interface": {
+		"displayName": "aplus",
+		"shortDescription": "Ship gate, second opinions, audits and stacked PRs",
+		"developerName": "Andrea Zanenghi",
+		"category": "Productivity",
+		"capabilities": ["Instructions"],
+		"websiteURL": "https://github.com/andeeplus/aplus"
+	}
+}
