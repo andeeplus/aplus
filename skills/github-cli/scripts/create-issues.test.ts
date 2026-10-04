@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
@@ -216,8 +216,7 @@ else if (endpoint.endsWith('/issues')) {
 
 		const repo = path.join(work, 'repo');
 		const drafts = path.join(work, 'drafts');
-		mkdirSync(path.join(repo, '.github'), { recursive: true });
-		execFileSync('cp', ['-R', path.join(root, '.github/'), path.join(repo, '.github')]);
+		cpSync(path.join(root, '.github'), path.join(repo, '.github'), { recursive: true });
 		execFileSync('git', ['init', '-q'], { cwd: repo });
 		mkdirSync(drafts);
 		writeFileSync(
