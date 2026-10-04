@@ -39,7 +39,7 @@ The change under review is all three of:
 
 4. **Re-check.** Run step 1 again, then re-run only the reviewers whose findings you fixed. There is no second fix round for these reviewers.
 
-5. **Second model.** With the checks green, invoke the [second-opinion](../second-opinion/SKILL.md) skill by name and run it on the same base, with notes on what steps 2 to 4 found, fixed and left. It runs at most two rounds and uses the same classes, and you verify each of its findings before acting on it. When no harness is configured, it runs on your own harness with another model, as that skill says.
+5. **Second model.** With the checks green, invoke the [second-opinion](../second-opinion/SKILL.md) skill by name and run it on the same base, with notes on what steps 2 to 4 found, fixed and left. It runs at most two rounds and uses the same classes, and you verify each of its findings before acting on it. When no listed reviewer is from another model family, it runs as a subagent on another model, as that skill says.
 
 6. **Verdict.** End with exactly one of:
 
