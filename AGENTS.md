@@ -29,8 +29,9 @@ Inside a skill, progressive disclosure keeps what an agent loads small:
 
 ## Versions and changelog
 
-- `version` is the same in `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json` and `.cursor-plugin/plugin.json`. It stays at 0.1.0 until the first set of skills is complete.
-- After 0.1.0, every change a user notices gets one line in `CHANGELOG.md` under the next version, starting with the skill's name.
+- Changesets owns the version. It stays at 0.1.0, with no changesets, until the first set of skills is complete.
+- After that, every change a user notices adds a changeset in `.changeset/`, written by hand as the commit-expert skill describes. Its summary starts with the skill's name, such as `triage: ask for a reproduction before labelling`.
+- To release, run `pnpm changeset:version`. It bumps `package.json`, writes `CHANGELOG.md`, and copies the version into the three plugin manifests. `pnpm check` fails when a manifest's version differs from `package.json`.
 - An installed copy stays on its version until the version changes. To try unreleased changes in Claude Code, load this folder for one session: `claude --plugin-dir <path to this repository>`.
 
 ## Commits
