@@ -45,6 +45,7 @@ The skills are generic: they never name a project's commands, branches or paths.
 | [testing](skills/testing/SKILL.md)                                 | Choosing a test layer and writing tests that can fail                                                    |
 | [second-opinion](skills/second-opinion/SKILL.md)                   | A different agent and model reviews a finished change, read-only, in at most two rounds                  |
 | [final-review](skills/final-review/SKILL.md)                       | Ship gate: checks, three parallel reviews, one fix round, a second opinion, a ready or not-ready verdict |
+| [github-cli](skills/github-cli/SKILL.md)                           | Issues from validated draft files, pull requests and stacks with gh-stack, checks and reviews through gh |
 
 ## Versions
 
