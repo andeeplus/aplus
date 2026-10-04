@@ -25,7 +25,7 @@ export type Draft = {
 
 export type FieldMeta = { fieldId: string; name: string; required: boolean; hasDefaultValue: boolean };
 
-type ManifestEntry = { jira: string; blockedByLinked?: string[] };
+type ManifestEntry = { jira: string; bodyResolved?: boolean; blockedByLinked?: string[] };
 type Manifest = Record<string, ManifestEntry>;
 type IssueLink = { id: string; type: { name: string }; inwardIssue?: { key: string }; outwardIssue?: { key: string } };
 
@@ -145,6 +145,8 @@ export function linkState(
 	return { state: link.inwardIssue?.key === blocker ? 'right' : 'inverted', id: link.id };
 }
 
+const hasToken = (body: string) => body.search(KEY_TOKEN) !== -1;
+
 function cli(...args: string[]): string {
 	return execFileSync('atlassian-cli', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
 }
@@ -208,12 +210,18 @@ function linkBlocker(blocker: string, blocked: string): void {
 function apply(project: string, ordered: Draft[], pool: Draft[], manifest: Manifest, manifestPath: string): void {
 	const save = () => writeFileSync(manifestPath, `${JSON.stringify(manifest, null, '\t')}\n`);
 	for (const draft of ordered.filter((candidate) => !manifest[candidate.key])) {
-		manifest[draft.key] = { jira: createIssue(draft, project, manifest) };
+		const body = resolveTokens(draft.body, manifest);
+		manifest[draft.key] = { jira: createIssue(draft, project, manifest), bodyResolved: !hasToken(body) };
 		save();
 		console.log(`[issue] ${manifest[draft.key].jira} ${draft.title}`);
 	}
 	for (const draft of pool.filter((candidate) => manifest[candidate.key])) {
 		const entry = manifest[draft.key];
+		if (!entry.bodyResolved) {
+			const body = resolveTokens(draft.body, manifest);
+			cli('jira', 'issue', 'update', entry.jira, '--description', body);
+			entry.bodyResolved = !hasToken(body);
+		}
 		const linked = new Set(entry.blockedByLinked ?? []);
 		for (const blocker of draft.blockedBy.filter((key) => !linked.has(key) && manifest[key])) {
 			linkBlocker(manifest[blocker].jira, entry.jira);
