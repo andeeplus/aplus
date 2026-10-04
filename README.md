@@ -38,7 +38,9 @@ The skills are generic: they never name a project's commands, branches or paths.
 
 ## Skills
 
-None yet.
+| Skill                                          | Use                                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [commit-expert](skills/commit-expert/SKILL.md) | Commit messages, PR titles, changelog lines and release notes; splitting work into commits |
 
 ## Versions
 
