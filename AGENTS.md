@@ -20,7 +20,7 @@ Inside a skill, progressive disclosure keeps what an agent loads small:
 
 ## Rules for skills
 
-- **Small.** `SKILL.md` holds the core flow and a routing table; everything else goes in a reference. One line per action.
+- **Concise.** Say each thing once, in as few words as it needs. Keep `SKILL.md` to the core flow and a routing table, with detail in references, where that split helps. Be pragmatic about size: a longer skill that reads best as one file stays one file.
 - **Generic.** A skill names no project, command, branch or path. For those it defers to the project's `AGENTS.md` and the project skill it names. A workflow skill names no host or tracker either: it defers to the platform skill, such as `github`.
 - **Script it.** If two agents could do a step differently, write a script and make `SKILL.md` say to run it. Never reimplement a script's job by hand.
 - **Schemas live in the project.** Issue forms, labels and the pull request template are in the project's `.github/`. Skills read them; they do not restate them.
