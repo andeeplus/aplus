@@ -10,5 +10,5 @@
 		"types": ["node"],
 		"verbatimModuleSyntax": true
 	},
-	"include": ["skills/**/*.ts", "skills/**/*.mts", "scripts/**/*.mts"]
+	"include": ["skills/**/*.ts", "skills/**/*.mts", "scripts/**/*.ts", "scripts/**/*.mts"]
 }

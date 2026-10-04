@@ -10,7 +10,7 @@
 	"scripts": {
 		"changeset": "changeset",
 		"changeset:version": "changeset version && node --experimental-strip-types scripts/sync-version.mts",
-		"check": "pnpm format:check && pnpm typecheck && pnpm test && node --experimental-strip-types scripts/sync-version.mts --check",
+		"check": "pnpm format:check && pnpm typecheck && pnpm test && node --experimental-strip-types scripts/check-skills.mts && node --experimental-strip-types scripts/sync-version.mts --check",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"test": "vitest run",
