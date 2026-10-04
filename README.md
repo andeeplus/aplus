@@ -1,8 +1,12 @@
-# aplus
+# @andeeplus/aplus
+
+```text
+▄████▄   ▄     ▄█████ ██ ▄█▀ ██ ██     ██     ▄█████
+██▄▄██ ▄▄█▄▄   ▀▀▀▄▄▄ ████   ██ ██     ██     ▀▀▀▄▄▄
+██  ██   █     █████▀ ██ ▀█▄ ██ ██████ ██████ █████▀
+```
 
 Agent skills for shipping changes with care: a ship gate before every commit or pull request, a second opinion from a different model, audits that become issues, stacked pull requests, and Gherkin scenarios for every bug. They work in Claude Code, Codex and Cursor.
-
-**Status:** 0.1.0, in progress. Skills are added one at a time.
 
 ## Install
 
@@ -35,6 +39,19 @@ The skills are generic: they never name a project's commands, branches or paths.
 | `AGENTS.md` at the repository root                                                  | Coding rules, the integration branch, the merge method, issue and pull request policy                     |
 | A project skill that `AGENTS.md` names, such as `.agents/skills/<project>/SKILL.md` | A table pointing each need (checks, CI, test setup, release notes, issue forms) to the file that holds it |
 | `.github/`                                                                          | Issue forms, `labels.yml` and the pull request template                                                   |
+
+## A development flow
+
+The skills chain into one flow. Each step names the skill that runs it, and each skill hands over to the next.
+
+1. **Decide.** [triage](skills/triage/SKILL.md) checks a ticket is real, finds where it lives and recommends bug, misuse or request. [audit](skills/audit/SKILL.md) does the same for a whole area of code.
+2. **Plan.** [create-issue](skills/create-issue/SKILL.md) turns the decision into an issue that stands alone, or an ordered program of them. [gherkin](skills/gherkin/SKILL.md) writes the expected behaviour as scenarios.
+3. **Build.** [debug](skills/debug/SKILL.md) proves a bug's root cause with a failing loop. [testing](skills/testing/SKILL.md) picks the test layer and writes the test that fails first.
+4. **Gate.** [final-review](skills/final-review/SKILL.md) runs the checks and three parallel reviews, fixes the easy findings once, then asks [second-opinion](skills/second-opinion/SKILL.md) for another model's view. It ends with `ready to ship` or `not ready`.
+5. **Ship.** [commit-expert](skills/commit-expert/SKILL.md) writes the commits and release note. [create-pr](skills/create-pr/SKILL.md) opens one PR per issue, stacks dependent work, answers reviews and merges when asked.
+6. **Pause.** [handoff](skills/handoff/SKILL.md) writes a note a fresh agent can resume from.
+
+[github](skills/github/SKILL.md) and [atlassian](skills/atlassian/SKILL.md) run the host commands for steps 2 and 5.
 
 ## Skills
 
