@@ -19,13 +19,15 @@ atlassian-cli bb api /2.0/repositories/<ws>/<repo>/pullrequests/<id>/diff    # t
 
 ## Stacks
 
-A stacked PR's destination is the branch below. After changing a lower branch, rebase the branches above onto it and push them with `--force-with-lease`. Before merging a PR that has PRs on top, retarget each one to the merge's destination, then check it with `bb pr get`:
+A stacked PR's destination is the branch below. After changing a lower branch, rebase the branches above onto it and push them with `--force-with-lease`.
+
+Merge bottom up with [scripts/merge-stack.mts](../scripts/merge-stack.mts). It retargets every open PR stacked on the PR to its destination, reads each back, and merges only if all moved, because Bitbucket can accept the retarget without applying it. Run it for each PR in turn:
 
 ```sh
-atlassian-cli bb api /2.0/repositories/<ws>/<repo>/pullrequests/<child id> -X put -d '{"destination":{"branch":{"name":"<base>"}}}'
+node --experimental-strip-types <this skill's folder>/scripts/merge-stack.mts <repo> <id> --strategy <merge_commit|squash|fast_forward> [--apply]
 ```
 
-Merge bottom up.
+Without `--apply` it prints the plan.
 
 ## Reviews
 
@@ -45,8 +47,4 @@ atlassian-cli bb pipeline logs <repo> <build number> --failed-only
 
 ## Merge
 
-Merge checks (approvals, no requested changes, no open tasks, a green pipeline) block only on the Premium plan, so confirm them yourself first. Then, with the project's strategy:
-
-```sh
-atlassian-cli bb pr merge <repo> <id> --strategy <merge_commit|squash|fast_forward> --message "<title>"
-```
+Merge checks (approvals, no requested changes, no open tasks, a green pipeline) block only on the Premium plan, so confirm them yourself first. A single PR, or the bottom of a stack, merges with the script above. A PR with nothing stacked on it also merges with `atlassian-cli bb pr merge <repo> <id> --strategy <strategy> --message "<title>"`.
