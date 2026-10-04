@@ -4,10 +4,11 @@ This repository is the aplus plugin: generic agent skills, plus a thin manifest 
 
 ## Layout
 
-| Path                                                                       | Holds                                                                     |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `skills/<name>/`                                                           | One folder per skill. Every tool reads this folder.                       |
-| `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/` | Manifests and marketplaces. They only point at `skills/`; keep them thin. |
+| Path                                                                                        | Holds                                                                     |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `skills/<name>/`                                                                            | One folder per skill. Every tool reads this folder.                       |
+| `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/`                  | Manifests and marketplaces. They only point at `skills/`; keep them thin. |
+| `.opencode/plugins/index.js` (the `main` of `package.json`), the `pi` key in `package.json` | The OpenCode plugin and the Pi package. They only register `skills/`.     |
 
 Inside a skill, progressive disclosure keeps what an agent loads small:
 
@@ -28,6 +29,36 @@ Inside a skill, progressive disclosure keeps what an agent loads small:
 - **Say what to do.** Describe the supported path. Do not describe an action a skill does not support, even to forbid it: naming it suggests it.
 - **Link, don't copy.** Skills link to each other with relative paths, such as `../final-review/SKILL.md`.
 - **Vendored files** keep their license beside them and a link to their source.
+
+## Shape of a `SKILL.md`
+
+An agent reads top to bottom and acts early, so a skill puts each part before the step that needs it. Every skill uses this order and omits the sections it does not need. Vendored skills keep their source's shape. `pnpm check` enforces the description and the heading order.
+
+1. **`description`:** what the skill does, then a sentence starting `Use` that lists the words a user types for it. It is all a harness reads to decide whether to load the skill: keep the trigger words.
+2. **`# Title`**, then one line: the contract, or the stance the skill takes. A skill with a long flow adds it as one line, such as `clarify → audit → ship`.
+3. **Project line**, when the skill depends on the project: "**Project specifics** (_what_) come from the project's `AGENTS.md` and the project skill it names."
+4. **`## Rules`:** bullets that start with a bold imperative.
+5. **`## References`:** a `Task | Read` table, one row per reference.
+6. **Domain sections,** named by noun, such as `Format` or `Posture`: the knowledge the skill applies.
+7. **`## Script`:** the command, run as written, and what it does.
+8. **`## Flow`:** numbered steps, one action each, led by a verb. A skill with several flows names each by its verb, such as `Pause` and `Pick up`, and puts no `## Flow` heading.
+9. **`## Output`:** the exact shape of what the skill returns.
+
+## Vocabulary
+
+One word per concept, in every skill and reference. Skills ship without this file, so a skill still says what a term means where it first uses it, such as "scratch files outside the tree".
+
+| Word                   | Means                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| **publish**            | Any action others see: push, open or edit a PR or issue, comment, transition, merge. |
+| **host**, **tracker**  | Where code and PRs live; where issues live.                                          |
+| **project skill**      | The skill the project's `AGENTS.md` names.                                           |
+| **integration branch** | The branch PRs target.                                                               |
+| **gate**, **verdict**  | A check that must pass; its one-line result.                                         |
+| **finding**            | A review result, classed `easy`, `nit` or `rework`.                                  |
+| **draft**              | An issue as a file, before it is created.                                            |
+| **scratch file**       | A file outside the tree, never committed.                                            |
+| **loop**               | The one command that reproduces a symptom.                                           |
 
 ## Versions and changelog
 

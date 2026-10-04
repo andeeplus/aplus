@@ -12,7 +12,7 @@ gh api repos/{owner}/{repo}/milestones --jq '.[].title'            # existing mi
 
 ## Issues
 
-Create issues with the [issue script](../SKILL.md#issue-script), never with `gh issue create`.
+Create issues with the [issue script](../SKILL.md#script), never with `gh issue create`.
 
 ```sh
 gh issue list --search "<key words>" --state all              # look for a duplicate

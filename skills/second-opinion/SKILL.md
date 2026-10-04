@@ -1,6 +1,6 @@
 ---
 name: second-opinion
-description: A second opinion on a finished change from a model of another family (through Claude Code, Codex, Cursor or OpenCode, listed in the project's .env, or a subagent on another model when none fits), read-only, after your own review. At most two rounds, one to find real defects and one to check the fixes. Use for a second opinion, a cross-model review of a diff, a review by another model or agent, or as final-review's last step.
+description: A read-only review of a finished change by a model of another family, in at most two rounds, through another agent CLI or a subagent on another model. Use for a second opinion, a cross-model review of a diff, a review by another model or agent, or as final-review's last step.
 allowed-tools: Bash(node --experimental-strip-types *run-review.mts *)
 ---
 
@@ -36,7 +36,7 @@ SECOND_OPINION_REVIEWERS=opencode:opencode-go/kimi-k3,opencode:github-copilot/gp
 | `cursor`   | `cursor-agent -p --mode ask`                                    | refused: the id names it, as in `grok-4.7-high` or `model[effort=low]` | `cursor-agent --list-models`                   |
 | `opencode` | `opencode run --agent plan`                                     | `--variant`, per provider                                              | `opencode models`                              |
 
-## Run
+## Script
 
 ```sh
 node --experimental-strip-types <this skill's folder>/scripts/run-review.mts --base <ref> --notes <file> --self <your model id> [--round 1|2]
@@ -55,7 +55,7 @@ The coding agent runs this itself; the user never has to. Run it from inside the
 - Invoke this skill by name rather than only reading this file. Its `allowed-tools` pre-approves the command above, so a harness that blocks one agent from starting another lets it run. A harness that ignores `allowed-tools` needs the same rule in its own settings.
 - A change too large for one prompt fails with a message. Review it in parts with a nearer `--base`.
 
-## Rounds
+## Flow
 
 There are at most two rounds per change. The script refuses a third.
 

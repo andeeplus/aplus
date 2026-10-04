@@ -1,13 +1,31 @@
 ---
 name: commit-expert
-description: Use when writing commit messages, PR titles, changelog lines, changesets or short release notes, or when splitting work into commits. Conventional commits, concise wording, direct technical language, and no fluff.
+description: Write short, precise commit messages, PR titles, changelog lines, changesets and release notes as conventional commits. Use to write any of these, or to split work into commits.
 ---
 
 # Commit expert
 
-Write short, precise engineering-facing messages: commit messages, PR titles, changelog lines, release notes.
+Name the outcome, in the fewest precise words.
 
 **Project specifics** (allowed types and scopes, a title length limit, release-note rules) come from the project's `AGENTS.md` and the project skill it names, or its commit tooling config. They override the defaults below.
+
+## Rules
+
+- **One line** unless the user asks for a body. When the work has an issue, add a `Refs:` footer naming it in the host's form, so the host links the commit to the issue:
+
+    ```text
+    fix(router): restore scroll position on back navigation
+
+    Refs: #12
+    ```
+
+- **Describe the outcome,** not the process.
+- **Be concrete:** name the module, API or boundary that changed, not a vague area.
+- **Cut filler:** no marketing language and no preamble such as "Here is your commit message".
+- **Shorten in order:** cut filler, then use precise nouns, then drop secondary details. Keep the primary behaviour.
+
+**Good:** `fix(router): restore scroll position on back navigation`
+**Bad:** `fix(router): improve the navigation logic for better scroll handling`
 
 ## Format
 
@@ -16,24 +34,6 @@ Write short, precise engineering-facing messages: commit messages, PR titles, ch
 **Types** (common defaults): `fix` (wrong to correct), `feat` (new capability), `refactor` (internals only), `perf`, `docs`, `test`, `build`, `ci`, `chore`.
 
 **Scope:** the package or subsystem that changed. Keep it singular. Omit it if it adds no clarity.
-
-## Rules
-
-- One line unless the user asks for a body. When the work has an issue, add a `Refs:` footer naming it in the host's form, so the host links the commit to the issue:
-
-    ```text
-    fix(router): restore scroll position on back navigation
-
-    Refs: #12
-    ```
-
-- Describe the outcome, not the process.
-- Name the concrete module, API or boundary that changed, not a vague area.
-- No filler, no marketing language, no preamble such as "Here is your commit message".
-- When it is too long: cut filler, then use precise nouns, then drop secondary details. Keep the primary behaviour.
-
-**Good:** `fix(router): restore scroll position on back navigation`
-**Bad:** `fix(router): improve the navigation logic for better scroll handling`
 
 ## PR titles
 

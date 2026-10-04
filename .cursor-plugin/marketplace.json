@@ -1,0 +1,8 @@
+{
+	"name": "aplus",
+	"owner": { "name": "Andrea Zanenghi" },
+	"metadata": {
+		"description": "Agent workflow for shipping changes: a ship gate, a second opinion from another model, codebase audits, issue-driven programs and stacked pull requests."
+	},
+	"plugins": [{ "name": "aplus", "source": "./" }]
+}
