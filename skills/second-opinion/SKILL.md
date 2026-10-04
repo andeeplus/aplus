@@ -1,6 +1,6 @@
 ---
 name: second-opinion
-description: A second opinion on a finished change from a different agent harness and model (Claude Code, Codex, Cursor or OpenCode, set in the project's .env, or your own harness on another model when none is set), read-only, after your own review. At most two rounds, one to find real defects and one to check the fixes. Use for a second opinion, an adversarial or cross-model review of a diff, a review by another model or agent, or as final-review's last step.
+description: A second opinion on a finished change from a different agent harness and model (Claude Code, Codex, Cursor or OpenCode, set in the project's .env, or your own harness on another model when none is set), read-only, after your own review. At most two rounds, one to find real defects and one to check the fixes. Use for a second opinion, a cross-model review of a diff, a review by another model or agent, or as final-review's last step.
 allowed-tools: Bash(node --experimental-strip-types *run-review.mts *)
 ---
 

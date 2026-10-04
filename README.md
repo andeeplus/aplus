@@ -1,6 +1,6 @@
 # aplus
 
-Agent skills for shipping changes with care: a ship gate before every commit or pull request, a second opinion from a different model, audits that become GitHub issues, and stacked pull requests. They work in Claude Code, Codex and Cursor.
+Agent skills for shipping changes with care: a ship gate before every commit or pull request, a second opinion from a different model, audits that become issues, stacked pull requests, and Gherkin scenarios for every bug. They work in Claude Code, Codex and Cursor.
 
 **Status:** 0.1.0, in progress. Skills are added one at a time.
 
