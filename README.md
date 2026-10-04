@@ -48,6 +48,7 @@ The skills are generic: they never name a project's commands, branches or paths.
 | [final-review](skills/final-review/SKILL.md)                       | Ship gate: checks, three parallel reviews, one fix round, a second opinion, a ready or not-ready verdict |
 | [create-issue](skills/create-issue/SKILL.md)                       | Issues that stand alone: duplicate check, problem and evidence first, programs of ordered issues         |
 | [create-pr](skills/create-pr/SKILL.md)                             | Open pull requests: one per issue, dependent work stacked, reviews answered, merged only when asked      |
+| [atlassian](skills/atlassian/SKILL.md)                             | Bitbucket pull requests and pipelines, Jira issues, Confluence pages, through atlassian-cli              |
 | [github](skills/github/SKILL.md)                                   | Issues from validated draft files, pull requests and stacks with gh-stack, checks and reviews through gh |
 | [audit](skills/audit/SKILL.md)                                     | Audit an area into local notes, turn findings into issues, carry them through to merged PRs              |
 | [triage](skills/triage/SKILL.md)                                   | Triage incoming issues: duplicates, reproduction, bug or intended, and a recommendation to approve       |
