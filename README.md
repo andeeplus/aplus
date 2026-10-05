@@ -60,11 +60,11 @@ Cursor has no install command for a plugin from GitHub. Use one of these:
 
 The skills are generic: they never name a project's commands, branches or paths. They read those from the project:
 
-| File                                                                                | Holds                                                                                                     |
-| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `AGENTS.md` at the repository root                                                  | Coding rules, the integration branch, the merge method, issue and pull request policy                     |
-| A project skill that `AGENTS.md` names, such as `.agents/skills/<project>/SKILL.md` | A table pointing each need (checks, CI, test setup, release notes, issue forms) to the file that holds it |
-| `.github/`                                                                          | Issue forms, `labels.yml` and the pull request template                                                   |
+| File                                                                                | Holds                                                                                                                   |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` at the repository root                                                  | Coding rules, the integration branch, the merge method, issue and pull request policy                                   |
+| A project skill that `AGENTS.md` names, such as `.agents/skills/<project>/SKILL.md` | A table pointing each need (checks, CI, test setup, release notes, issue forms) to the file that holds it               |
+| `.github/`                                                                          | Issue forms, `labels.yml` and the pull request template. The github skill's `--init` installs default forms and labels. |
 
 ## A development flow
 

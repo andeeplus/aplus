@@ -14,6 +14,7 @@ Every agent does GitHub work the same way: formats come from the repository's `.
 - **Ask before you publish,** unless the user asked for that exact action. Pushing, creating or editing issues and PRs, commenting and merging all publish.
 - **Issues come from draft files.** Write a draft and run the issue script below. Never call `gh issue create` by hand: the script validates the draft against the issue forms and labels, then sets the type, labels, milestone, parent and "blocked by" links.
 - **The schema is in `.github/`.** The forms in `.github/ISSUE_TEMPLATE/` define each kind of issue and its sections. `.github/labels.yml`, when present, lists the allowed labels. `.github/pull_request_template.md` is the PR body. Read them; do not restate them.
+- **Commit forms before filing.** When the script reports no issue forms, ask the user to choose: install the defaults with `--init`, then review and commit them; copy in forms the project already keeps elsewhere, such as the account's `.github` repository; or stop. The script reads only the repository's own `.github/`, and committed forms give people who file on github.com the same sections as agents.
 - **Use scratch files** outside the tree for drafts and PR bodies, so they are never committed.
 - **Never** put a token on the command line, force-push the integration branch or someone else's branch, or link a local or gitignored file from an issue or PR. Stack branches are rewritten only through `gh stack`, which pushes with `--force-with-lease`.
 
@@ -34,3 +35,9 @@ node --experimental-strip-types <this skill's folder>/scripts/create-issues.mts 
 ```
 
 Without `--apply` it only validates and prints what it would create, with each issue's labels and milestone. `<issue script>` in the references means this command.
+
+```sh
+node --experimental-strip-types <this skill's folder>/scripts/create-issues.mts --init [--repo owner/name]
+```
+
+`--init` copies the default forms (bug, task, tracking, decision) and labels from [assets/](assets/) into `.github/`, and prints what it wrote. A form keeps its issue type only when the repository has that type: organizations define issue types, and a personal repository has none. It keeps an existing `labels.yml`, refuses to overwrite an existing form, and never commits.
