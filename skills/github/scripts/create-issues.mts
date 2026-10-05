@@ -3,12 +3,14 @@
  * links them on GitHub.
  *
  * Usage: node --experimental-strip-types create-issues.mts <file.md | folder> [more files] [--repo owner/name] [--apply]
+ *        node --experimental-strip-types create-issues.mts --init [--repo owner/name]
  *
  * Run it from inside the target repository. Format: ../references/issues.md. Schema: `.github/ISSUE_TEMPLATE/*.yml`
- * and, when present, `.github/labels.yml`. `--apply` needs an authenticated `gh` CLI.
+ * and, when present, `.github/labels.yml`. `--init` copies the default forms and labels from ../assets/ into
+ * `.github/`. `--apply` and `--init` need an authenticated `gh` CLI.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -56,7 +58,9 @@ type Manifest = Record<string, ManifestEntry>;
 
 const KEY_TOKEN = /#\{([A-Za-z0-9_-]+)\}/g;
 const FENCED_BLOCK = /^(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1[ \t]*$/gm;
-const USAGE = 'Usage: create-issues.mts <file.md | folder> [more files] [--repo owner/name] [--apply]';
+const USAGE = `Usage: create-issues.mts <file.md | folder> [more files] [--repo owner/name] [--apply]
+       create-issues.mts --init [--repo owner/name]`;
+const DEFAULTS = path.resolve(import.meta.dirname, '../assets');
 
 function unquote(value: string): string {
 	return value.trim().replace(/^(['"])(.*)\1$/, '$2');
@@ -126,20 +130,51 @@ function parseLabels(source: string): Label[] {
  */
 export function readSchema(root: string): Schema {
 	const formsDir = path.join(root, '.github/ISSUE_TEMPLATE');
-	if (!existsSync(formsDir)) throw new Error(`No issue forms in ${formsDir}. Drafts are validated against them.`);
 	const forms = new Map(
-		readdirSync(formsDir)
+		(existsSync(formsDir) ? readdirSync(formsDir) : [])
 			.filter((file) => /\.ya?ml$/.test(file) && !/^config\.ya?ml$/.test(file))
 			.map((file) => [
 				file.replace(/\.ya?ml$/, ''),
 				parseIssueForm(readFileSync(path.join(formsDir, file), 'utf8')),
 			]),
 	);
+	if (forms.size === 0) {
+		throw new Error(
+			`No issue forms in ${formsDir}. Drafts are validated against them. Default forms and labels are in ${DEFAULTS}; install them with --init.`,
+		);
+	}
 	const labelsFile = path.join(root, '.github/labels.yml');
 	const labels = existsSync(labelsFile)
 		? new Map(parseLabels(readFileSync(labelsFile, 'utf8')).map((label) => [label.name, label]))
 		: undefined;
 	return { forms, labels };
+}
+
+/**
+ * Copies the default issue forms and `labels.yml` into `root`'s `.github/` and returns the paths written.
+ *
+ * @remarks
+ * A form keeps its `type` only when `types` has it: GitHub defines issue types per organization, and a personal
+ * repository has none. An existing `labels.yml` is kept.
+ *
+ * @throws When any of the forms exists. Nothing is written then.
+ */
+export function installDefaults(root: string, types: Set<string>): string[] {
+	const forms = readdirSync(path.join(DEFAULTS, 'ISSUE_TEMPLATE')).map((file) =>
+		path.join('.github/ISSUE_TEMPLATE', file),
+	);
+	const existing = forms.filter((file) => existsSync(path.join(root, file)));
+	if (existing.length > 0) throw new Error(`Not overwriting ${existing.join(', ')}. Nothing was written.`);
+	const files = existsSync(path.join(root, '.github/labels.yml')) ? forms : ['.github/labels.yml', ...forms];
+	mkdirSync(path.join(root, '.github/ISSUE_TEMPLATE'), { recursive: true });
+	for (const file of files) {
+		const source = readFileSync(path.join(DEFAULTS, path.relative('.github', file)), 'utf8');
+		writeFileSync(
+			path.join(root, file),
+			source.replace(/^type:[ \t]*(.+)\n/m, (line, type: string) => (types.has(unquote(type)) ? line : '')),
+		);
+	}
+	return files;
 }
 
 /**
@@ -307,6 +342,22 @@ function ghList<T>(endpoint: string): T[] {
 	return (JSON.parse(output) as T[][]).flat();
 }
 
+/**
+ * Names of the issue types `repo` can use; none for a personal repository.
+ */
+function issueTypes(repo: string): Set<string> {
+	const [owner, name] = repo.split('/');
+	const result = gh<{ data: { repository: { issueTypes: { nodes: Array<{ name: string }> } | null } } }>(
+		'POST',
+		'graphql',
+		{
+			query: 'query($owner: String!, $name: String!) { repository(owner: $owner, name: $name) { issueTypes(first: 100) { nodes { name } } } }',
+			variables: { owner, name },
+		},
+	);
+	return new Set(result.data.repository.issueTypes?.nodes.map((type) => type.name));
+}
+
 function issueLabels(draft: Draft, schema: Schema): string[] {
 	return [...new Set([...(schema.forms.get(draft.template)?.labels ?? []), ...draft.labels])];
 }
@@ -431,58 +482,77 @@ const isMain = process.argv[1] !== undefined && realpathSync(process.argv[1]) ==
 if (isMain) {
 	const { values, positionals } = parseArgs({
 		args: process.argv.slice(2).filter((arg) => arg !== '--'),
-		options: { repo: { type: 'string' }, apply: { type: 'boolean', default: false } },
+		options: {
+			repo: { type: 'string' },
+			apply: { type: 'boolean', default: false },
+			init: { type: 'boolean', default: false },
+		},
 		allowPositionals: true,
 	});
-	if (positionals.length === 0) throw new Error(USAGE);
+	if (values.init ? positionals.length > 0 || values.apply : positionals.length === 0) throw new Error(USAGE);
 	const cwd = process.env.INIT_CWD ?? process.cwd();
-	const inputs = positionals.map((input) => {
-		const file = path.resolve(cwd, input);
-		return { file, isDirectory: statSync(file).isDirectory() };
-	});
-	const dirs = new Set(inputs.map(({ file, isDirectory }) => (isDirectory ? file : path.dirname(file))));
-	if (dirs.size > 1) throw new Error('Pass drafts from one folder at a time; its manifest.json tracks what exists.');
-	const [dir] = dirs;
-
 	const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd, encoding: 'utf8' }).trim();
-	const schema = readSchema(root);
-	const pool = readDrafts(dir);
-	const files = new Set(inputs.filter(({ isDirectory }) => !isDirectory).map(({ file }) => path.basename(file)));
-	const selected = files.size > 0 ? pool.filter((draft) => files.has(draft.file)) : pool;
-	const manifestPath = path.join(dir, 'manifest.json');
-	const manifest: Manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : {};
-	const known = { drafts: new Set(pool.map((draft) => draft.key)), created: new Set(Object.keys(manifest)) };
-	const errors = validateDrafts(selected, schema, known);
-	if (errors.length > 0) {
-		for (const error of errors) console.error(`[error] ${error}`);
-		process.exit(1);
-	}
+	const repo = () =>
+		values.repo ??
+		execFileSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], {
+			cwd,
+			encoding: 'utf8',
+		}).trim();
 
-	const ordered = orderDrafts(selected);
-	for (const draft of ordered) {
-		const status = manifest[draft.key] ? `#${manifest[draft.key].number}` : 'new';
-		const links = [
-			draft.parent && `parent ${draft.parent}`,
-			draft.blockedBy.length > 0 && `blocked by ${draft.blockedBy.join(', ')}`,
-			`labels ${issueLabels(draft, schema).join(', ') || '-'}`,
-		]
-			.filter(Boolean)
-			.join('; ');
-		console.log(
-			`${status.padEnd(5)} ${draft.key.padEnd(4)} ${draft.template.padEnd(8)} ${(draft.milestone ?? '-').padEnd(6)} ${draft.title}${links ? ` (${links})` : ''}`,
-		);
-	}
-	console.log(`\n${ordered.length} drafts valid.`);
-
-	if (values.apply) {
-		const repo =
-			values.repo ??
-			execFileSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], {
-				cwd,
-				encoding: 'utf8',
-			}).trim();
-		apply(repo, ordered, pool, schema, manifest, manifestPath);
+	if (values.init) {
+		const types = issueTypes(repo());
+		const written = installDefaults(root, types);
+		for (const file of written) console.log(`[wrote] ${file}`);
+		if (!written.includes('.github/labels.yml')) {
+			console.log('[kept] .github/labels.yml');
+			const { forms, labels } = readSchema(root);
+			const missing = [...new Set([...forms.values()].flatMap((form) => form.labels))].filter(
+				(label) => !labels?.has(label),
+			);
+			if (missing.length > 0) console.log(`[missing] ${missing.join(', ')}: add them to .github/labels.yml`);
+		}
+		console.log(`\nIssue types: ${[...types].join(', ') || 'none, so the forms set no type'}.`);
+		console.log('Review the files, then commit them.');
 	} else {
-		console.log('Dry run. Add --apply to create the new ones.');
+		const inputs = positionals.map((input) => {
+			const file = path.resolve(cwd, input);
+			return { file, isDirectory: statSync(file).isDirectory() };
+		});
+		const dirs = new Set(inputs.map(({ file, isDirectory }) => (isDirectory ? file : path.dirname(file))));
+		if (dirs.size > 1)
+			throw new Error('Pass drafts from one folder at a time; its manifest.json tracks what exists.');
+		const [dir] = dirs;
+
+		const schema = readSchema(root);
+		const pool = readDrafts(dir);
+		const files = new Set(inputs.filter(({ isDirectory }) => !isDirectory).map(({ file }) => path.basename(file)));
+		const selected = files.size > 0 ? pool.filter((draft) => files.has(draft.file)) : pool;
+		const manifestPath = path.join(dir, 'manifest.json');
+		const manifest: Manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : {};
+		const known = { drafts: new Set(pool.map((draft) => draft.key)), created: new Set(Object.keys(manifest)) };
+		const errors = validateDrafts(selected, schema, known);
+		if (errors.length > 0) {
+			for (const error of errors) console.error(`[error] ${error}`);
+			process.exit(1);
+		}
+
+		const ordered = orderDrafts(selected);
+		for (const draft of ordered) {
+			const status = manifest[draft.key] ? `#${manifest[draft.key].number}` : 'new';
+			const links = [
+				draft.parent && `parent ${draft.parent}`,
+				draft.blockedBy.length > 0 && `blocked by ${draft.blockedBy.join(', ')}`,
+				`labels ${issueLabels(draft, schema).join(', ') || '-'}`,
+			]
+				.filter(Boolean)
+				.join('; ');
+			console.log(
+				`${status.padEnd(5)} ${draft.key.padEnd(4)} ${draft.template.padEnd(8)} ${(draft.milestone ?? '-').padEnd(6)} ${draft.title}${links ? ` (${links})` : ''}`,
+			);
+		}
+		console.log(`\n${ordered.length} drafts valid.`);
+
+		if (values.apply) apply(repo(), ordered, pool, schema, manifest, manifestPath);
+		else console.log('Dry run. Add --apply to create the new ones.');
 	}
 }

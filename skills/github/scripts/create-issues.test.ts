@@ -1,9 +1,17 @@
 import { execFileSync } from 'node:child_process';
-import { chmodSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
-import { orderDrafts, parseDraft, readSchema, resolveTokens, type Schema, validateDrafts } from './create-issues.mts';
+import {
+	installDefaults,
+	orderDrafts,
+	parseDraft,
+	readSchema,
+	resolveTokens,
+	type Schema,
+	validateDrafts,
+} from './create-issues.mts';
 
 const SCRIPT = path.join(import.meta.dirname, 'create-issues.mts');
 
@@ -171,6 +179,144 @@ test('readSchema skips config.yml, reads block-style labels, and leaves labels u
 	} finally {
 		rmSync(bare, { recursive: true, force: true });
 	}
+});
+
+describe('default forms', () => {
+	const DEFAULT_FORMS = [
+		'.github/ISSUE_TEMPLATE/bug.yml',
+		'.github/ISSUE_TEMPLATE/decision.yml',
+		'.github/ISSUE_TEMPLATE/task.yml',
+		'.github/ISSUE_TEMPLATE/tracking.yml',
+	];
+	const dirs: string[] = [];
+	const tempRepo = (files: Record<string, string> = {}) => {
+		const dir = mkdtempSync(path.join(os.tmpdir(), 'create-issues-defaults-'));
+		dirs.push(dir);
+		for (const [file, source] of Object.entries(files)) {
+			mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+			writeFileSync(path.join(dir, file), source);
+		}
+		return dir;
+	};
+	afterAll(() => {
+		for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+	});
+
+	test.for<Record<string, string>>([{}, { '.github/ISSUE_TEMPLATE/config.yml': 'blank_issues_enabled: false\n' }])(
+		'a repository without forms is pointed at the defaults and --init: %j',
+		(files) => {
+			const repo = tempRepo(files);
+			expect(() => readSchema(repo)).toThrow(
+				`No issue forms in ${path.join(repo, '.github/ISSUE_TEMPLATE')}. Drafts are validated against them. Default forms and labels are in ${path.resolve(import.meta.dirname, '../assets')}; install them with --init.`,
+			);
+		},
+	);
+
+	test('install writes the forms and labels, and keeps only the issue types the repository has', () => {
+		const repo = tempRepo({ '.github/.keep': '' });
+		expect(installDefaults(repo, new Set(['Bug'])).sort()).toEqual([...DEFAULT_FORMS, '.github/labels.yml']);
+		const { forms, labels } = readSchema(repo);
+		expect([...forms].map(([name, form]) => [name, form.type, form.labels])).toEqual([
+			['bug', 'Bug', []],
+			['decision', '', ['needs-decision']],
+			['task', '', []],
+			['tracking', '', ['tracking']],
+		]);
+		expect([...(labels?.keys() ?? [])]).toEqual([
+			'severity:high',
+			'severity:medium',
+			'severity:low',
+			'tracking',
+			'needs-decision',
+		]);
+	});
+
+	test('install keeps an existing labels.yml', () => {
+		const repo = tempRepo({ '.github/labels.yml': 'mine' });
+		expect(installDefaults(repo, new Set()).sort()).toEqual(DEFAULT_FORMS);
+		expect(readFileSync(path.join(repo, '.github/labels.yml'), 'utf8')).toBe('mine');
+	});
+
+	test('install refuses to overwrite an existing form and writes nothing', () => {
+		const repo = tempRepo({ '.github/ISSUE_TEMPLATE/bug.yml': 'mine' });
+		expect(() => installDefaults(repo, new Set())).toThrow(
+			'Not overwriting .github/ISSUE_TEMPLATE/bug.yml. Nothing was written.',
+		);
+		expect(readdirSync(path.join(repo, '.github'), { recursive: true })).toEqual([
+			'ISSUE_TEMPLATE',
+			'ISSUE_TEMPLATE/bug.yml',
+		]);
+		expect(readFileSync(path.join(repo, '.github/ISSUE_TEMPLATE/bug.yml'), 'utf8')).toBe('mine');
+	});
+
+	test('the default forms and labels validate a draft of each kind', () => {
+		const repo = tempRepo();
+		installDefaults(repo, new Set());
+		const drafts = [
+			draft(
+				'B1.md',
+				'template: bug\ntitle: B\nlabels: [severity:high]',
+				'### Problem\nx\n### Failure scenario\nx\n### Expected\nx\n### Evidence\nx\n### Fix\nx\n### Acceptance\nx\n### Version\nx',
+			),
+			draft(
+				'M1.md',
+				'template: task\ntitle: M\nparent: T1',
+				'### Why\nx\n### Change\nx\n### Deletes\nx\n### Acceptance\nx',
+			),
+			draft('T1.md', 'template: tracking\ntitle: T', '### Goal\nx\n### Scope\nx\n### Done when\nx'),
+			draft(
+				'D1.md',
+				'template: decision\ntitle: D',
+				'### Question\nx\n### Context\nx\n### Options\nx\n### Recommendation\nx',
+			),
+		];
+		const keys = new Set(drafts.map((item) => item.key));
+		expect(validateDrafts(drafts, readSchema(repo), { drafts: keys, created: new Set() })).toEqual([]);
+	});
+
+	/**
+	 * @remarks
+	 * A fake `gh` first on `PATH` logs its stdin and answers the issue-type query: an organization's types, or
+	 * `null` for a personal repository.
+	 */
+	test.for([
+		{ issueTypes: { nodes: [{ name: 'Bug' }] }, summary: 'Issue types: Bug.', bug: 'Bug' },
+		{ issueTypes: null, summary: 'Issue types: none, so the forms set no type.', bug: '' },
+	])('--init asks GitHub for the issue types and installs the forms: $summary', ({ issueTypes, summary, bug }) => {
+		const work = tempRepo();
+		const bin = path.join(work, 'bin');
+		const log = path.join(work, 'gh.log');
+		const repo = path.join(work, 'repo');
+		mkdirSync(bin);
+		mkdirSync(repo);
+		writeFileSync(
+			path.join(bin, 'gh'),
+			`#!/usr/bin/env node
+require('node:fs').writeFileSync(${JSON.stringify(log)}, require('node:fs').readFileSync(0, 'utf8'));
+process.stdout.write(${JSON.stringify(JSON.stringify({ data: { repository: { issueTypes } } }))});
+`,
+		);
+		chmodSync(path.join(bin, 'gh'), 0o755);
+		execFileSync('git', ['init', '-q'], { cwd: repo });
+		const output = execFileSync(
+			process.execPath,
+			['--experimental-strip-types', SCRIPT, '--init', '--repo', 'o/2048'],
+			{
+				cwd: repo,
+				env: { ...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH}`, INIT_CWD: repo },
+				encoding: 'utf8',
+			},
+		);
+		expect(JSON.parse(readFileSync(log, 'utf8')).variables).toEqual({ owner: 'o', name: '2048' });
+		expect(output).toContain('[wrote] .github/ISSUE_TEMPLATE/bug.yml');
+		expect(output).toContain(summary);
+		expect([...readSchema(repo).forms].map(([name, form]) => [name, form.type])).toEqual([
+			['bug', bug],
+			['decision', ''],
+			['task', ''],
+			['tracking', ''],
+		]);
+	});
 });
 
 test('orderDrafts puts parents and blockers first', () => {
