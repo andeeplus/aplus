@@ -2,7 +2,7 @@
 
 ## The draft
 
-The format is [the GitHub draft format](../../github/references/issues.md#the-draft), with `template` set to the Jira issue type (such as Bug, Task or Epic), no `milestone`, and a free Markdown body: `##` headings, code blocks, and a bug's Gherkin scenario in a `gherkin` block. Use the sections the project skill lists.
+The format is [the GitHub draft format](../../github/references/issues.md#the-draft), with `template` set to the Jira issue type (such as Bug, Task or Epic), no `milestone`, and a free Markdown body: `##` headings, code blocks, and a bug's Gherkin scenario in a `gherkin` block. Use the sections the project skill lists. When it lists none, use the fields of the matching [default issue form](../../github/assets/ISSUE_TEMPLATE/) as `##` headings in the form's order: `bug.yml` for a Bug, `task.yml` for a Task, `tracking.yml` for an Epic, and `decision.yml` for a decision, filed as a Task.
 
 ## Create
 
