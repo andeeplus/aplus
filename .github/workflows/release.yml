@@ -1,0 +1,36 @@
+name: Release
+
+on:
+    push:
+        branches: [main]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            pull-requests: write
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+            - uses: pnpm/action-setup@v6
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: pnpm
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm check
+            - name: Read the next version
+              id: next
+              run: |
+                  pnpm -s changeset status --output="$RUNNER_TEMP/status.json"
+                  echo "version=$(node -p "require('$RUNNER_TEMP/status.json').releases[0]?.newVersion ?? ''")" >> "$GITHUB_OUTPUT"
+            - uses: changesets/action@v2.1.2
+              with:
+                  version-script: pnpm changeset:version
+                  publish-script: pnpm changeset publish
+                  commit-message: 'chore: release v${{ steps.next.outputs.version }}'
+                  pr-title: 'chore: release v${{ steps.next.outputs.version }}'

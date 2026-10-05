@@ -101,7 +101,7 @@ The skills chain into one flow. Each step names the skill that runs it, and each
 
 ## Versions
 
-The version stays at 0.1.0 until the first set of skills is complete. From then on, [CHANGELOG.md](CHANGELOG.md) records what changes in each release.
+Merging a change with a changeset to `main` opens or updates a release PR; merging that PR tags the version. [CHANGELOG.md](CHANGELOG.md) records what changes in each release.
 
 ## License
 
