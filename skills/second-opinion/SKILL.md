@@ -1,6 +1,6 @@
 ---
 name: second-opinion
-description: A read-only review of a finished change by a model of another family, in at most two rounds, through another agent CLI or a subagent on another model. Use for a second opinion, a cross-model review of a diff, a review by another model or agent, or as final-review's last step.
+description: A read-only review of a finished change by a model of another family, in at most three rounds, through another agent CLI or a subagent on another model. Use for a second opinion, a cross-model review of a diff, a review by another model or agent, or as final-review's last step.
 allowed-tools: Bash(node --experimental-strip-types *run-review.mts *)
 ---
 
@@ -39,7 +39,7 @@ SECOND_OPINION_REVIEWERS=opencode:opencode-go/kimi-k3,opencode:github-copilot/gp
 ## Script
 
 ```sh
-node --experimental-strip-types <this skill's folder>/scripts/run-review.mts --base <ref> --notes <file> --self <your model id> [--round 1|2]
+node --experimental-strip-types <this skill's folder>/scripts/run-review.mts --base <ref> --notes <file> --self <your model id> [--round 1|2|3]
 ```
 
 The coding agent runs this itself; the user never has to. Run it from inside the repository, in the background: a review takes minutes. `<ref>` is the base the change targets, such as `origin/<integration branch>`, or, for a stacked PR, the branch below it. `--self` is the model you run on. The script sends the brief, the round, your notes, the diff from the merge base to the working tree, and the paths of untracked files, then prints the reviewer's findings.
@@ -57,12 +57,13 @@ The coding agent runs this itself; the user never has to. Run it from inside the
 
 ## Flow
 
-There are at most two rounds per change. The script refuses a third.
+There are at most three rounds per change, and the third is optional. The script refuses a fourth.
 
 1. **Review it yourself first**, with [final-review](../final-review/SKILL.md) or the project's own gate. The checks must be green.
 2. **Round 1.** Write notes to a scratch file outside the repository: what your review found, what you fixed, and what you deliberately left, with a reason for each. The reviewer treats those points as settled. Run `--round 1`.
 3. **Show the review.** As soon as the review returns, show the user the reviewer's output in full, unedited, before acting on it. Show every round, including one that finds nothing.
 4. **Verify each finding** against the code: reproduce the scenario or trace it through. The other model is a reviewer, not an authority. Fix the findings that hold and are `easy`, then run the checks again. Reject the ones that do not hold, with a one-line reason.
 5. **Round 2, only if round 1 led to a code change.** Write new notes that list each round 1 finding with what you did: fixed at `file:line`, or rejected and why. Run `--round 2`. The reviewer checks only those fixes and what they touch. It does not look for new issues.
-6. **Stop.** Do not ask again because you disagree with a result or because round 2 raised something. Verify what round 2 reports, fix what is `easy` and holds, and list the rest as open findings for the user to decide.
-7. **Clean up.** Delete your notes and every prompt file the script wrote: each prompt file holds the full diff, and nothing else removes it.
+6. **Round 3, optional, only if round 2 led to a code change.** Run it as round 2, with notes on each round 2 finding, and `--round 3`.
+7. **Stop.** Do not ask again because you disagree with a result or because the last round raised something. Verify what it reports, fix what is `easy` and holds, and list the rest as open findings for the user to decide.
+8. **Clean up.** Delete your notes and every prompt file the script wrote: each prompt file holds the full diff, and nothing else removes it.

@@ -18,9 +18,9 @@ Check what the change actually touches:
 
 A point the notes settle, fixed or left with a reason, is closed. Raise it again only with a concrete failure scenario the notes do not answer. Skip style, naming, formatting, structure and matters of taste.
 
-## Round 2: check the fixes
+## Rounds 2 and 3: check the fixes
 
-This is the last round. The notes list your round 1 findings and what the author did with each. Check only that:
+The notes list the findings of the round before and what the author did with each. Check only that:
 
 - each fix holds against its original scenario;
 - the fixes broke nothing they touch.

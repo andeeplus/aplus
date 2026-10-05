@@ -87,7 +87,7 @@ The skills chain into one flow. Each step names the skill that runs it, and each
 | [senior-technical-writer](skills/senior-technical-writer/SKILL.md) | Writing and reviewing docs against the code they describe                                                |
 | [testing](skills/testing/SKILL.md)                                 | Choosing a test layer and writing tests that can fail                                                    |
 | [gherkin](skills/gherkin/SKILL.md)                                 | Given/When/Then scenarios: every bug's expected behaviour, acceptance criteria, Cucumber feature files   |
-| [second-opinion](skills/second-opinion/SKILL.md)                   | A different agent and model reviews a finished change, read-only, in at most two rounds                  |
+| [second-opinion](skills/second-opinion/SKILL.md)                   | A different agent and model reviews a finished change, read-only, in at most three rounds                |
 | [final-review](skills/final-review/SKILL.md)                       | Ship gate: checks, three parallel reviews, one fix round, a second opinion, a ready or not-ready verdict |
 | [create-issue](skills/create-issue/SKILL.md)                       | Issues that stand alone: duplicate check, problem and evidence first, programs of ordered issues         |
 | [create-pr](skills/create-pr/SKILL.md)                             | Open pull requests: one per issue, dependent work stacked, reviews answered, merged only when asked      |

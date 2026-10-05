@@ -2,16 +2,16 @@
  * Sends a change, already reviewed by its author, to a model from another family for a second review, read-only,
  * and prints its findings.
  *
- * Usage: node --experimental-strip-types run-review.mts --base <ref> --notes <file> --self <model> [--round 1|2]
- *        node --experimental-strip-types run-review.mts --base <ref> --notes <file> --harness <h> --model <m> [--round 1|2]
+ * Usage: node --experimental-strip-types run-review.mts --base <ref> --notes <file> --self <model> [--round 1|2|3]
+ *        node --experimental-strip-types run-review.mts --base <ref> --notes <file> --harness <h> --model <m> [--round 1|2|3]
  *
  * Run it from inside the repository. `--notes` holds the author's own review: what it found, fixed and left, and in
- * round 2 what was done with each round 1 finding. `--self` is the model the caller runs on. The reviewer is the first
- * `harness:model[@effort]` entry in `SECOND_OPINION_REVIEWERS` whose model family differs from it; the variable comes from the
- * environment or the repository's root `.env`. With no such entry, the script writes the prompt to a file, prints
- * its path and exits 2, for the caller to hand to a subagent on another model. `--harness` and `--model` skip the
- * list. An optional `SECOND_OPINION_<HARNESS>_API_KEY` is used instead of that harness's CLI login. The reviewer's
- * brief is ../references/brief.md.
+ * rounds 2 and 3 what was done with each finding of the round before. `--self` is the model the caller runs on. The
+ * reviewer is the first `harness:model[@effort]` entry in `SECOND_OPINION_REVIEWERS` whose model family differs from
+ * it; the variable comes from the environment or the repository's root `.env`. With no such entry, the script writes
+ * the prompt to a file, prints its path and exits 2, for the caller to hand to a subagent on another model. `--harness`
+ * and `--model` skip the list. An optional `SECOND_OPINION_<HARNESS>_API_KEY` is used instead of that harness's CLI
+ * login. The reviewer's brief is ../references/brief.md.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -21,7 +21,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 const USAGE =
-	'Usage: node --experimental-strip-types run-review.mts --base <ref> --notes <file> (--self <model> | --harness <h> --model <m>) [--round 1|2]';
+	'Usage: node --experimental-strip-types run-review.mts --base <ref> --notes <file> (--self <model> | --harness <h> --model <m>) [--round 1|2|3]';
 
 /**
  * @remarks
@@ -183,7 +183,7 @@ function buildPrompt(review: {
 	const { brief, round, notes, base, diff, untracked } = review;
 	const tag = randomUUID().slice(0, 8);
 	const files = untracked.length > 0 ? untracked.map((file) => `- ${file}`).join('\n') : 'None.';
-	return `${brief}\n## This review\n\nRound ${round} of 2.\n\nThe author's notes:\n\n<notes-${tag}>\n${notes.trim()}\n</notes-${tag}>\n\nEverything since the merge base with \`${base}\`, committed or not:\n\n<diff-${tag}>\n${diff}</diff-${tag}>\n\nNew untracked files, not in the diff; read them:\n\n${files}\n`;
+	return `${brief}\n## This review\n\nRound ${round} of at most 3.\n\nThe author's notes:\n\n<notes-${tag}>\n${notes.trim()}\n</notes-${tag}>\n\nEverything since the merge base with \`${base}\`, committed or not:\n\n<diff-${tag}>\n${diff}</diff-${tag}>\n\nNew untracked files, not in the diff; read them:\n\n${files}\n`;
 }
 
 /**
@@ -206,9 +206,9 @@ if (isMain) {
 		},
 	});
 	if (!values.base || !values.notes) throw new Error(USAGE);
-	if (values.round !== '1' && values.round !== '2') {
+	if (!['1', '2', '3'].includes(values.round)) {
 		throw new Error(
-			'There are at most two rounds: --round 1 looks for defects, --round 2 checks the fixes. After round 2, report what is left instead of asking again.',
+			'There are at most three rounds: --round 1 looks for defects, --round 2 checks the fixes from round 1, and an optional --round 3 checks the fixes from round 2. After the last round, report what is left instead of asking again.',
 		);
 	}
 	if ((values.harness === undefined) !== (values.model === undefined))

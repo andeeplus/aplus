@@ -85,11 +85,11 @@ test('reads the family from a model id or alias, past any provider prefix', () =
 	]);
 });
 
-test('refuses a third round without calling a harness', () => {
-	const result = run('--self', 'opus', '--round', '3');
+test('refuses a fourth round without calling a harness', () => {
+	const result = run('--self', 'opus', '--round', '4');
 
 	expect(result.status).not.toBe(0);
-	expect(result.stderr).toContain('at most two rounds');
+	expect(result.stderr).toContain('at most three rounds');
 	expect(existsSync(log)).toBe(false);
 });
 
@@ -142,7 +142,7 @@ test('sends the brief, the round, the notes, every change since the merge base a
 	expect(argv).toEqual(expect.arrayContaining(['-p', '--trust', '--mode', 'ask', '--model', 'grok-4']));
 	const prompt = argv[argv.length - 1];
 	expect(prompt).toContain('# Review from a second model');
-	expect(prompt).toContain('Round 1 of 2.');
+	expect(prompt).toContain('Round 1 of at most 3.');
 	expect(prompt).toContain('fixed a missing null check');
 	expect(prompt).toContain('-export const a = 1;\n+export const a = 3;');
 	expect(prompt).toContain('- b.ts');
@@ -154,6 +154,14 @@ test('reviews on the harness and model passed as flags, ignoring the list', () =
 
 	expect(result.status).toBe(0);
 	expect(harnessCall().argv).toEqual(expect.arrayContaining(['--model', 'gpt-5.6-sol-high']));
+});
+
+test.for(['2', '3'])('accepts round %s and names it in the prompt', (round) => {
+	const result = run('--harness', 'cursor', '--model', 'grok-4', '--round', round);
+
+	expect(result.status).toBe(0);
+	const { argv } = harnessCall();
+	expect(argv[argv.length - 1]).toContain(`Round ${round} of at most 3.`);
 });
 
 test("passes an @effort suffix as each harness's own option, and refuses it for Cursor", () => {
