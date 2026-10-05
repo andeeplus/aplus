@@ -1,6 +1,6 @@
 {
 	"name": "aplus",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Agent workflow for shipping changes: a ship gate, a second opinion from another model, codebase audits, issue-driven programs and stacked pull requests.",
 	"author": { "name": "Andrea Zanenghi", "url": "https://github.com/andeeplus" },
 	"homepage": "https://github.com/andeeplus/aplus",
