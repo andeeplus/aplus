@@ -13,7 +13,7 @@ atlassian-cli -f json bb pr get <repo> <id>
 atlassian-cli bb api /2.0/repositories/<ws>/<repo>/pullrequests/<id>/diff    # the diff itself; `bb pr diff` prints only a link
 ```
 
-- **Description:** Bitbucket has no template file, so take its sections from the project skill.
+- **Description:** fill in `.bitbucket/pull_request_template.md` from the source branch. Without that file, take the sections from the project skill.
 - **Issues:** put each Jira key in the branch name, such as `feat/PROJ-12-<slug>`, the title, and each commit's footer as `Refs: PROJ-12`. Jira links the branch, commits and PR to the issue. A merge transitions nothing: move the issues yourself ([jira.md](jira.md)).
 - **Reviewers:** `--default-reviewers` adds the repository's defaults, which the API otherwise skips.
 
