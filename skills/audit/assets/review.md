@@ -18,11 +18,11 @@ respondsTo: README.md
 
 ## Agreement
 
-{Bullets — what holds up.}
+{Bullets: what holds up.}
 
 ## Disagreement / reprioritization
 
-{Bullets — only if different.}
+{Bullets: only if different.}
 
 ## New findings
 
