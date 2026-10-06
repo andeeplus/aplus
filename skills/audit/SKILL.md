@@ -5,14 +5,13 @@ description: Audit a codebase area's design and defects into local notes, file t
 
 # Audit
 
-**clarify → audit → issues (on request) → execute (on request) → ship → hand off**
+**clarify → audit → issues (on request) → execute (on request) → hand off**
 
 Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). Issues on the project's tracker are the plan: the audit is local working notes, and anything that must outlive it becomes an issue.
 
 ## Rules
 
 - **Correct over convenient.** Choose the long-term right fix. No workarounds, stubs, or docs that paper over a bad contract.
-- **Fix on the branch.** If the durable fix fits the issue's scope, implement it. Do not leave findings as comments or TODOs.
 - **Push for truth.** Types, tests, runtime behaviour and docs must agree.
 
 ## Posture
@@ -87,31 +86,15 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <sco
 
 ## Execute (on request)
 
-Work from the program's open change issues in "blocked by" order; as [create-issue: programs](../create-issue/references/programs.md) describes. Skip a decision issue, and anything it blocks, until a maintainer has answered it; never pick an option yourself.
+Run the program's open change issues with [deliver](../deliver/SKILL.md). Within an audit:
 
-Use one branch and one PR per issue: from the integration branch, or stacked on the blocker's PR while it is open, as [create-pr: stacks](../create-pr/references/stacks.md) says. Name branches with no audit keys.
-
-## Ship
-
-1. Run [final-review](../final-review/SKILL.md).
-2. Triage what it leaves:
-
-    | Finding                                  | Action                                                                                                                                 |
-    | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-    | The durable fix fits the issue's scope   | Fix it on the branch. No workarounds.                                                                                                  |
-    | The fix is clear but out of scope        | Draft a bug or task in the program's `issues/` and create it, asking first.                                                            |
-    | The fix is unclear, or too heavy for now | Draft a decision that states the options, and create it, asking first.                                                                 |
-    | The fix is a program of its own          | Start a new audit for it in its own scope folder, and link it from a decision. Do not execute it before the current program completes. |
-    | `nit`                                    | List it in the PR body.                                                                                                                |
-
-3. Run final-review again. Its verdict now counts the issues you filed; continue only on `ready to ship`.
-4. Commit with [commit-expert](../commit-expert/SKILL.md). Open the PR with [create-pr](../create-pr/SKILL.md), asking first. Keep audit keys and `.audit/` paths out of branch names, titles and bodies.
-
-**Gate:** no PR without a `ready to ship` verdict, and none while a deferred finding has no issue.
+- Deliver's draft folder is the program's `issues/`, so its drafts share the `manifest.json`.
+- A finding that is a program of its own stays a decision draft; propose an audit for it at hand off.
+- Keep audit keys and `.audit/` paths out of branch names, titles and bodies.
 
 ## Hand off
 
-The program is done when every change sub-issue is closed; the tracker may not close the tracking issue by itself. When it is done, or the user stops:
+The program is done when every change sub-issue is closed; the tracker may not close the tracking issue by itself. When it is done, the deliver run ends, or the user stops:
 
 1. Summarize what shipped: PRs merged, issues closed, key outcomes.
 2. List the open decisions and any spawned audits not yet started.
