@@ -1,9 +1,9 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from 'vitest';
-import { fill, pickDate } from './new-audit.mts';
+import { auditDirs, fill, pickDate, projectName } from './new-audit.mts';
 
 const SCRIPT = path.join(import.meta.dirname, 'new-audit.mts');
 
@@ -18,6 +18,55 @@ test('fill replaces spaced and unspaced placeholders and leaves the rest', () =>
 	expect(fill('a: { x }, b: {x}, c: {y}', { x: '1' })).toBe('a: 1, b: 1, c: {y}');
 });
 
+test('auditDirs defaults to .audit, resolves {project} and keeps the order', () => {
+	expect(auditDirs(undefined, '/r', 'p')).toEqual(['/r/.audit']);
+	expect(auditDirs(' , ', '/r', 'p')).toEqual(['/r/.audit']);
+	expect(auditDirs('.audit, /v/{project}/a', '/r', 'p')).toEqual(['/r/.audit', '/v/p/a']);
+});
+
+test('projectName takes the origin repository, else the folder, and is folder-safe', () => {
+	const repo = mkdtempSync(path.join(os.tmpdir(), 'my repo-'));
+	try {
+		execFileSync('git', ['init', '-q'], { cwd: repo });
+		expect(projectName(repo)).toBe(path.basename(repo).replace(/ /g, '-'));
+		execFileSync('git', ['remote', 'add', 'origin', 'git@github.com:org/aplus.git'], { cwd: repo });
+		expect(projectName(repo)).toBe('aplus');
+	} finally {
+		rmSync(repo, { recursive: true, force: true });
+	}
+});
+
+test('mirrors get a copy per project and survive deleting the working copy', () => {
+	const repo = mkdtempSync(path.join(os.tmpdir(), 'new-audit-'));
+	const vault = mkdtempSync(path.join(os.tmpdir(), 'vault-'));
+	try {
+		execFileSync('git', ['init', '-q'], { cwd: repo });
+		writeFileSync(path.join(repo, '.gitignore'), '.audit/\n');
+		const run = (...args: string[]) =>
+			spawnSync(process.execPath, ['--experimental-strip-types', SCRIPT, ...args], {
+				cwd: repo,
+				env: {
+					...process.env,
+					INIT_CWD: repo,
+					APLUS_AUDIT_DIRS: `.audit,${path.join(vault, '{project}')}`,
+				},
+				encoding: 'utf8',
+			});
+		expect(run('router', '--author', 'a', '--model', 'm').status).toBe(0);
+		const mirror = path.join(vault, path.basename(repo), 'router');
+		const [date] = readdirSync(mirror);
+		writeFileSync(path.join(repo, '.audit/router', date, 'bugs.md'), '# Bugs\n\n## B1: x\n');
+		expect(run('--sync').status).toBe(0);
+		expect(readFileSync(path.join(mirror, date, 'bugs.md'), 'utf8')).toMatch(/B1/);
+		rmSync(path.join(repo, '.audit'), { recursive: true });
+		expect(existsSync(path.join(mirror, date, 'README.md'))).toBe(true);
+		expect(run('--sync').stderr).toMatch(/No audit in/);
+	} finally {
+		rmSync(repo, { recursive: true, force: true });
+		rmSync(vault, { recursive: true, force: true });
+	}
+});
+
 test('starts an audit, adds a review, and stops when .audit/ is not ignored', () => {
 	const repo = mkdtempSync(path.join(os.tmpdir(), 'new-audit-'));
 	try {
@@ -25,7 +74,7 @@ test('starts an audit, adds a review, and stops when .audit/ is not ignored', ()
 		const run = (...args: string[]) =>
 			spawnSync(process.execPath, ['--experimental-strip-types', SCRIPT, ...args], {
 				cwd: repo,
-				env: { ...process.env, INIT_CWD: repo },
+				env: { ...process.env, INIT_CWD: repo, APLUS_AUDIT_DIRS: '' },
 				encoding: 'utf8',
 			});
 		const start = ['router', '--author', 'claude-opus', '--model', 'opus'];
