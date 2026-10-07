@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+
+### Patch Changes
+
+- ad94790: audit: choose where the audit files go with `APLUS_AUDIT_DIRS`, and mirror them to a notes vault per project with `{project}`
+- ad94790: second-opinion: read the reviewers and API keys from `APLUS_SECOND_OPINION_*` variables
+
 ## 0.1.2
 
 ### Patch Changes
