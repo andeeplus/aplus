@@ -7,10 +7,10 @@
  *
  * Run it from inside the repository. `--notes` holds the author's own review: what it found, fixed and left, and in
  * rounds 2 and 3 what was done with each finding of the round before. `--self` is the model the caller runs on. The
- * reviewer is the first `harness:model[@effort]` entry in `SECOND_OPINION_REVIEWERS` whose model family differs from
+ * reviewer is the first `harness:model[@effort]` entry in `APLUS_SECOND_OPINION_REVIEWERS` whose model family differs from
  * it; the variable comes from the environment or the repository's root `.env`. With no such entry, the script writes
  * the prompt to a file, prints its path and exits 2, for the caller to hand to a subagent on another model. `--harness`
- * and `--model` skip the list. An optional `SECOND_OPINION_<HARNESS>_API_KEY` is used instead of that harness's CLI
+ * and `--model` skip the list. An optional `APLUS_SECOND_OPINION_<HARNESS>_API_KEY` is used instead of that harness's CLI
  * login. The reviewer's brief is ../references/brief.md.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -102,7 +102,7 @@ const HARNESSES: Partial<Record<string, (prompt: string, model: string, effort?:
 };
 
 /**
- * The variable each harness reads an API key from. `SECOND_OPINION_<HARNESS>_API_KEY` is passed to the reviewer under
+ * The variable each harness reads an API key from. `APLUS_SECOND_OPINION_<HARNESS>_API_KEY` is passed to the reviewer under
  * this name, so the coding agent's own key is left alone.
  *
  * @remarks
@@ -127,7 +127,7 @@ export function family(model: string): string {
 }
 
 /**
- * Parses `SECOND_OPINION_REVIEWERS`, a comma-separated list of `harness:model[@effort]`, and checks every entry, so a
+ * Parses `APLUS_SECOND_OPINION_REVIEWERS`, a comma-separated list of `harness:model[@effort]`, and checks every entry, so a
  * typo fails even when an earlier entry is picked. A comma inside brackets, as in Cursor's
  * `model[effort=high,fast=false]`, belongs to the id.
  */
@@ -236,7 +236,9 @@ if (isMain) {
 		picked = reviewer(values.harness, values.model);
 	} else {
 		const own = family(values.self ?? '');
-		picked = parseReviewers(process.env.SECOND_OPINION_REVIEWERS ?? '').find(({ model }) => family(model) !== own);
+		picked = parseReviewers(process.env.APLUS_SECOND_OPINION_REVIEWERS ?? '').find(
+			({ model }) => family(model) !== own,
+		);
 	}
 
 	const diff = git('-C', root, 'diff', git('-C', root, 'merge-base', values.base, 'HEAD').trim());
@@ -259,13 +261,13 @@ if (isMain) {
 		const file = path.join(mkdtempSync(path.join(os.tmpdir(), 'second-opinion-')), 'prompt.md');
 		writeFileSync(file, prompt);
 		console.error(
-			`No reviewer from a family other than ${family(values.self ?? '')} is set in SECOND_OPINION_REVIEWERS (${path.join(root, '.env')}). The review prompt is in ${file}: give it to a fresh, read-only subagent on another model, or run again with --harness and --model.`,
+			`No reviewer from a family other than ${family(values.self ?? '')} is set in APLUS_SECOND_OPINION_REVIEWERS (${path.join(root, '.env')}). The review prompt is in ${file}: give it to a fresh, read-only subagent on another model, or run again with --harness and --model.`,
 		);
 		process.exit(2);
 	}
 
 	const { harness, model, effort } = picked;
-	const apiKey = process.env[`SECOND_OPINION_${harness.toUpperCase()}_API_KEY`];
+	const apiKey = process.env[`APLUS_SECOND_OPINION_${harness.toUpperCase()}_API_KEY`];
 	const apiKeyVar = API_KEY_VARS[harness];
 	if (apiKey && !apiKeyVar) console.error(`${harness} takes no API key here; log in with its own CLI.`);
 	const env = apiKey && apiKeyVar ? { ...process.env, [apiKeyVar]: apiKey } : process.env;

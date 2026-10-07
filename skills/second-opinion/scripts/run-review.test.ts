@@ -16,10 +16,12 @@ let notes: string;
 /**
  * Runs the CLI in a scratch repository with fake `claude`, `cursor-agent`, `codex` and `opencode` first on `PATH` that log
  * their arguments.
- * The developer's own `SECOND_OPINION_*` variables are dropped so only the scratch `.env` counts.
+ * The developer's own `APLUS_SECOND_OPINION_*` variables are dropped so only the scratch `.env` counts.
  */
 function run(...args: string[]) {
-	const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('SECOND_OPINION_')));
+	const env = Object.fromEntries(
+		Object.entries(process.env).filter(([key]) => !key.startsWith('APLUS_SECOND_OPINION_')),
+	);
 	return spawnSync(
 		process.execPath,
 		['--experimental-strip-types', SCRIPT, '--base', 'main', '--notes', notes, ...args],
@@ -100,7 +102,7 @@ test('needs --self unless --harness and --model are passed together', () => {
 });
 
 test('writes the prompt to a file and exits 2 when no reviewer is from another family', () => {
-	writeFileSync(path.join(repo, '.env'), 'SECOND_OPINION_REVIEWERS=cursor:claude-4.5-sonnet,claude:sonnet\n');
+	writeFileSync(path.join(repo, '.env'), 'APLUS_SECOND_OPINION_REVIEWERS=cursor:claude-4.5-sonnet,claude:sonnet\n');
 	const result = run('--self', 'claude-opus-5-5');
 
 	expect(result.status).toBe(2);
@@ -111,7 +113,7 @@ test('writes the prompt to a file and exits 2 when no reviewer is from another f
 });
 
 test('fails, rather than skipping, when any listed entry is not supported', () => {
-	writeFileSync(path.join(repo, '.env'), 'SECOND_OPINION_REVIEWERS=cursor:grok-4,Claude:opus\n');
+	writeFileSync(path.join(repo, '.env'), 'APLUS_SECOND_OPINION_REVIEWERS=cursor:grok-4,Claude:opus\n');
 	const result = run('--self', 'gpt-6.1-sol');
 
 	expect(result.status).toBe(1);
@@ -120,7 +122,7 @@ test('fails, rather than skipping, when any listed entry is not supported', () =
 });
 
 test('refuses a fast model variant without calling a harness', () => {
-	writeFileSync(path.join(repo, '.env'), 'SECOND_OPINION_REVIEWERS=cursor:grok-4.7-high-fast\n');
+	writeFileSync(path.join(repo, '.env'), 'APLUS_SECOND_OPINION_REVIEWERS=cursor:grok-4.7-high-fast\n');
 	const result = run('--self', 'opus');
 
 	expect(result.status).not.toBe(0);
@@ -131,7 +133,7 @@ test('refuses a fast model variant without calling a harness', () => {
 test('sends the brief, the round, the notes, every change since the merge base and the untracked files to the first reviewer from another family, with its harness key under the variable the harness reads', () => {
 	writeFileSync(
 		path.join(repo, '.env'),
-		'SECOND_OPINION_REVIEWERS=cursor:claude-4.5-sonnet,cursor:grok-4\nSECOND_OPINION_CURSOR_API_KEY=review-key\nSECOND_OPINION_CODEX_API_KEY=other-key\n',
+		'APLUS_SECOND_OPINION_REVIEWERS=cursor:claude-4.5-sonnet,cursor:grok-4\nAPLUS_SECOND_OPINION_CURSOR_API_KEY=review-key\nAPLUS_SECOND_OPINION_CODEX_API_KEY=other-key\n',
 	);
 	const result = run('--self', 'claude-opus-5-5');
 
@@ -149,7 +151,7 @@ test('sends the brief, the round, the notes, every change since the merge base a
 });
 
 test('reviews on the harness and model passed as flags, ignoring the list', () => {
-	writeFileSync(path.join(repo, '.env'), 'SECOND_OPINION_REVIEWERS=codex:gpt-6.1-sol\n');
+	writeFileSync(path.join(repo, '.env'), 'APLUS_SECOND_OPINION_REVIEWERS=codex:gpt-6.1-sol\n');
 	const result = run('--harness', 'cursor', '--model', 'gpt-5.6-sol-high');
 
 	expect(result.status).toBe(0);
@@ -186,7 +188,7 @@ test("passes an @effort suffix as each harness's own option, and refuses it for 
 test("allows Cursor's fast=false override, commas inside its brackets included", () => {
 	writeFileSync(
 		path.join(repo, '.env'),
-		'SECOND_OPINION_REVIEWERS=cursor:claude-opus-4-8[effort=high,fast=false],codex:gpt-6.1-sol\n',
+		'APLUS_SECOND_OPINION_REVIEWERS=cursor:claude-opus-4-8[effort=high,fast=false],codex:gpt-6.1-sol\n',
 	);
 	const result = run('--self', 'grok-4.7-high');
 
