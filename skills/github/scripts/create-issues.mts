@@ -248,8 +248,23 @@ function referenceErrors(draft: Draft, known: KnownKeys, selected: Set<string>):
 	return errors;
 }
 
+/**
+ * The audit folders `body` mentions, which are never published: `.audit/` and each `APLUS_AUDIT_DIRS` entry, with
+ * `{project}` standing for any folder name.
+ */
+export function auditLinks(body: string, value = process.env.APLUS_AUDIT_DIRS ?? ''): string[] {
+	const entries = new Set(['.audit', ...value.split(',').map((entry) => entry.trim().replace(/\/+$/, ''))]);
+	entries.delete('');
+	return [...entries]
+		.filter((entry) => {
+			const parts = entry.split('{project}').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+			return new RegExp(`${parts.join('[^/]+')}/`).test(body);
+		})
+		.map((entry) => `${entry}/`);
+}
+
 function contentErrors(draft: Draft): string[] {
-	return draft.body.includes('.audit/') ? ['links to .audit/, which is not published'] : [];
+	return auditLinks(draft.body).map((audit) => `links to ${audit}, which is not published`);
 }
 
 /**
@@ -260,7 +275,7 @@ function contentErrors(draft: Draft): string[] {
  * (headings inside fenced code blocks are ignored), include every required one, and use only labels from `.github/labels.yml`
  * when that file exists. `blockedBy` and `#{KEY}` may point at any draft in the folder or a created issue; a
  * `parent` must be created already or be among `drafts`, because GitHub needs it at creation. Any mention of
- * `.audit/` in the body and parent or `blockedBy` cycles are rejected.
+ * an audit folder in the body and parent or `blockedBy` cycles are rejected.
  */
 export function validateDrafts(drafts: Draft[], schema: Schema, known: KnownKeys): string[] {
 	const selected = new Set(drafts.map((draft) => draft.key));
@@ -492,6 +507,11 @@ if (isMain) {
 	if (values.init ? positionals.length > 0 || values.apply : positionals.length === 0) throw new Error(USAGE);
 	const cwd = process.env.INIT_CWD ?? process.cwd();
 	const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd, encoding: 'utf8' }).trim();
+	try {
+		process.loadEnvFile(path.join(root, '.env'));
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+	}
 	const repo = () =>
 		values.repo ??
 		execFileSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], {

@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import {
+	auditLinks,
 	installDefaults,
 	orderDrafts,
 	parseDraft,
@@ -317,6 +318,13 @@ process.stdout.write(${JSON.stringify(JSON.stringify({ data: { repository: { iss
 			['tracking', ''],
 		]);
 	});
+});
+
+test('auditLinks matches .audit/ and each APLUS_AUDIT_DIRS entry, {project} as any folder, once each', () => {
+	expect(auditLinks('see .audit/x', '.audit')).toEqual(['.audit/']);
+	expect(auditLinks('see /v/aplus/audit/router', '.audit,/v/{project}/audit/')).toEqual(['/v/{project}/audit/']);
+	expect(auditLinks('see /v/other and /tmp/x', '.audit,/v/{project}/audit,/tmp/{project}')).toEqual([]);
+	expect(auditLinks('see aplus/notes/x', '{project}/notes')).toEqual(['{project}/notes/']);
 });
 
 test('orderDrafts puts parents and blockers first', () => {

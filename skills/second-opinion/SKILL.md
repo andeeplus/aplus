@@ -14,20 +14,20 @@ One variable, in the repository's `.env` or the environment: reviewers as `harne
 
 ```sh
 # Grok reviews Claude and GPT; Sol, at low effort, reviews Grok.
-SECOND_OPINION_REVIEWERS=cursor:grok-4.7-high,codex:gpt-6.1-sol@low
+APLUS_SECOND_OPINION_REVIEWERS=cursor:grok-4.7-high,codex:gpt-6.1-sol@low
 
 # From Claude Code, Sol reviews; from Codex, Opus does.
-SECOND_OPINION_REVIEWERS=codex:gpt-6.1-sol,claude:opus
+APLUS_SECOND_OPINION_REVIEWERS=codex:gpt-6.1-sol,claude:opus
 
 # OpenCode reaches several providers: Kimi reviews Claude and GPT; GPT reviews Kimi.
-SECOND_OPINION_REVIEWERS=opencode:opencode-go/kimi-k3,opencode:github-copilot/gpt-6.1-sol
+APLUS_SECOND_OPINION_REVIEWERS=opencode:opencode-go/kimi-k3,opencode:github-copilot/gpt-6.1-sol
 ```
 
 - **Family, not harness.** Cursor and OpenCode also run Claude and GPT models, and the review is only worth it from a model the author's blind spots do not share. The family comes from the id, after any `provider/`: `claude` for Claude ids and `opus`, `sonnet`, `fable` and `haiku`; `gpt` for `gpt`, `codex` and `o<n>`; otherwise the first word, such as `grok`.
 - **Effort is a suffix, not a model.** Write `gpt-6.1-sol@low`, not an invented `gpt-6.1-sol-light`. The suffix is one of `minimal`, `low`, `medium`, `high`, `xhigh` or `max`, and becomes the harness's own option in the table below.
 - **Exact ids, never fast.** A bare alias can resolve to a fast variant: in Cursor, `grok-4.7` means the account's default, such as `grok-4.7-high-fast`. The script refuses an id containing `fast`, except `[fast=false]`, and switches off Claude Code's fast mode, so Claude Code's aliases are safe.
 - **Ids are not checked.** They change often and differ per account, so a wrong id fails in the reviewer's CLI. List the current ones with the command in the table.
-- **Login, with a key as fallback.** Each CLI uses its own login. When the agent cannot reach it, as in CI or a sandbox, set `SECOND_OPINION_CLAUDE_API_KEY`, `SECOND_OPINION_CODEX_API_KEY` or `SECOND_OPINION_CURSOR_API_KEY`. The script passes it to the reviewer only, as `ANTHROPIC_API_KEY`, `CODEX_API_KEY` or `CURSOR_API_KEY`, so the coding agent's own key is left alone. OpenCode keeps a key per provider, set with `opencode auth login`.
+- **Login, with a key as fallback.** Each CLI uses its own login. When the agent cannot reach it, as in CI or a sandbox, set `APLUS_SECOND_OPINION_CLAUDE_API_KEY`, `APLUS_SECOND_OPINION_CODEX_API_KEY` or `APLUS_SECOND_OPINION_CURSOR_API_KEY`. The script passes it to the reviewer only, as `ANTHROPIC_API_KEY`, `CODEX_API_KEY` or `CURSOR_API_KEY`, so the coding agent's own key is left alone. OpenCode keeps a key per provider, set with `opencode auth login`.
 
 | Harness    | Runs headless and read-only as                                  | `@effort` becomes                                                      | Current ids                                    |
 | ---------- | --------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------- |

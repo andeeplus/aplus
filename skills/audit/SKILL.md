@@ -13,6 +13,7 @@ Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). I
 
 - **Correct over convenient.** Choose the long-term right fix. No workarounds, stubs, or docs that paper over a bad contract.
 - **Push for truth.** Types, tests, runtime behaviour and docs must agree.
+- **Sync after every change.** Each time you write, edit or create anything in the audit dir, including issue drafts and `manifest.json`, run `new-audit.mts --sync`. With no mirror it does nothing, so always run it.
 
 ## Posture
 
@@ -23,10 +24,13 @@ Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). I
 
 ## Files
 
-Artifacts go under `.audit/`. Check that it is gitignored; if it is not, ask before adding it to `.gitignore`.
+Artifacts go under the audit dir. Check that it is gitignored when it is inside the repository; if it is not, ask before adding it to `.gitignore`.
+
+- **`APLUS_AUDIT_DIRS`:** in the environment or the repository's `.env`, a list of dirs separated by commas. The first is where you work and defaults to `.audit`; the others are mirrors, such as a notes vault. `{project}` in an entry becomes the repository's name, so one value serves every project: `APLUS_AUDIT_DIRS=.audit,/Users/me/Vault/audits/{project}`.
+- **Mirrors** only receive copies, from `--sync`, and never lose a file the working copy loses.
 
 ```
-.audit/{scope-slug}/{YYYY-MM-DD}/
+{audit dir}/{scope-slug}/{YYYY-MM-DD}/
   README.md                from assets/readme.md: verdict, priorities, open questions a maintainer must answer,
                            every external package, doc or link consulted, and links to the files below
   bugs.md                  one "## {bug-key}: title" per defect: problem, failure scenario, evidence
@@ -58,15 +62,17 @@ Write nothing until scope and posture are confirmed.
 
 ## Audit
 
-Create the files with [scripts/new-audit.mts](scripts/new-audit.mts), then fill them in. It writes the date folder, fills the templates in [assets/](assets/), and stops when `.audit/` is not gitignored. Never create them by hand.
+Create the files with [scripts/new-audit.mts](scripts/new-audit.mts), then fill them in. It writes the date folder, fills the templates in [assets/](assets/), and stops when an audit dir inside the repository is not gitignored. Never create them by hand.
 
 ```sh
 node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <scope-slug> --author <author-slug> --model <model> [--posture strict|balanced]
 node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <scope-slug> --author <author-slug> --model <model> --review
+node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --sync
 ```
 
 - **First run:** the command without `--review` writes the files for the posture.
 - **Another author's review:** `--review` adds `review-{author-slug}.md`. Do not rewrite the first run's files.
+- **Sync:** `--sync` copies the working copy to every mirror. The first two commands sync on their own.
 - **Cross-audit:** the first author writes the full set. Each further author writes only `review-{author-slug}.md` from the same template, without reading the first author's files until their own findings are written. Once every author's file exists, write `synthesis.md` before drafting issues.
 
 ## Issues (on request)
@@ -90,7 +96,7 @@ Run the program's open change issues with [deliver](../deliver/SKILL.md). Within
 
 - Deliver's draft folder is the program's `issues/`, so its drafts share the `manifest.json`.
 - A finding that is a program of its own stays a decision draft; propose an audit for it at hand off.
-- Keep audit keys and `.audit/` paths out of branch names, titles and bodies.
+- Keep audit keys and audit dir paths out of branch names, titles and bodies.
 
 ## Hand off
 

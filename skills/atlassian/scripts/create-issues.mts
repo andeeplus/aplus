@@ -91,7 +91,7 @@ export function validateDrafts(drafts: Draft[], types: Map<string, FieldMeta[]>,
 			]
 				.filter((key) => !keys.has(key) && !created.has(key))
 				.map((key) => `unknown key ${key}`),
-			...(draft.body.includes('.audit/') ? ['links to .audit/, which is not published'] : []),
+			...auditLinks(draft.body).map((audit) => `links to ${audit}, which is not published`),
 		];
 		seen.add(draft.key);
 		return problems.map((problem) => `${draft.file}: ${problem}`);
@@ -143,6 +143,21 @@ export function linkState(
 	);
 	if (!link) return { state: 'missing' };
 	return { state: link.inwardIssue?.key === blocker ? 'right' : 'inverted', id: link.id };
+}
+
+/**
+ * The audit folders `body` mentions, which are never published: `.audit/` and each `APLUS_AUDIT_DIRS` entry, with
+ * `{project}` standing for any folder name.
+ */
+export function auditLinks(body: string, value = process.env.APLUS_AUDIT_DIRS ?? ''): string[] {
+	const entries = new Set(['.audit', ...value.split(',').map((entry) => entry.trim().replace(/\/+$/, ''))]);
+	entries.delete('');
+	return [...entries]
+		.filter((entry) => {
+			const parts = entry.split('{project}').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+			return new RegExp(`${parts.join('[^/]+')}/`).test(body);
+		})
+		.map((entry) => `${entry}/`);
 }
 
 const hasToken = (body: string) => body.search(KEY_TOKEN) !== -1;
@@ -254,6 +269,14 @@ if (isMain)
 			throw new Error('Usage: create-issues.mts <file.md | folder> [more files] --project KEY [--apply]');
 		}
 		const cwd = process.env.INIT_CWD ?? process.cwd();
+		try {
+			const root = execFileSync('git', ['rev-parse', '--show-toplevel'], {
+				cwd,
+				encoding: 'utf8',
+				stdio: ['ignore', 'pipe', 'ignore'],
+			}).trim();
+			process.loadEnvFile(path.join(root, '.env'));
+		} catch {}
 		const inputs = positionals.map((input) => {
 			const file = path.resolve(cwd, input);
 			return { file, isDirectory: statSync(file).isDirectory() };

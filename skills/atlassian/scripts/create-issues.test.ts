@@ -3,7 +3,15 @@ import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync 
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { linkState, orderDrafts, parseDraft, resolveTokens, unsetRequired, validateDrafts } from './create-issues.mts';
+import {
+	auditLinks,
+	linkState,
+	orderDrafts,
+	parseDraft,
+	resolveTokens,
+	unsetRequired,
+	validateDrafts,
+} from './create-issues.mts';
 
 const draft = (name: string, front: string, body = 'Text') => parseDraft(`${name}.md`, `---\n${front}\n---\n${body}`);
 const types = new Map([['Task', [{ fieldId: 'summary', name: 'Summary', required: true, hasDefaultValue: false }]]]);
@@ -51,6 +59,13 @@ describe('validateDrafts', () => {
 		];
 		expect(validateDrafts(cycle, types, new Set()).join()).toMatch(/cycle/);
 	});
+});
+
+it('auditLinks matches .audit/ and each APLUS_AUDIT_DIRS entry, {project} as any folder, once each', () => {
+	expect(auditLinks('see .audit/x', '.audit')).toEqual(['.audit/']);
+	expect(auditLinks('see /v/aplus/audit/router', '.audit,/v/{project}/audit/')).toEqual(['/v/{project}/audit/']);
+	expect(auditLinks('see /v/other and /tmp/x', '.audit,/v/{project}/audit,/tmp/{project}')).toEqual([]);
+	expect(auditLinks('see aplus/notes/x', '{project}/notes')).toEqual(['{project}/notes/']);
 });
 
 describe('orderDrafts and resolveTokens', () => {
