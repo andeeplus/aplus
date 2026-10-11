@@ -4,11 +4,11 @@ This repository is the aplus plugin: generic agent skills, plus a thin manifest 
 
 ## Layout
 
-| Path                                                                                        | Holds                                                                     |
-| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `skills/<name>/`                                                                            | One folder per skill. Every tool reads this folder.                       |
-| `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.agents/plugins/`                  | Manifests and marketplaces. They only point at `skills/`; keep them thin. |
-| `.opencode/plugins/index.js` (the `main` of `package.json`), the `pi` key in `package.json` | The OpenCode plugin and the Pi package. They only register `skills/`.     |
+| Path                                                                                          | Holds                                                                     |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `skills/<name>/`                                                                              | One folder per skill. Every tool reads this folder.                       |
+| `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.github/plugin/`, `.agents/plugins/` | Manifests and marketplaces. They only point at `skills/`; keep them thin. |
+| `.opencode/plugins/index.js` (the `main` of `package.json`), the `pi` key in `package.json`   | The OpenCode plugin and the Pi package. They only register `skills/`.     |
 
 Inside a skill, progressive disclosure keeps what an agent loads small:
 
@@ -65,7 +65,7 @@ One word per concept, in every skill and reference. Skills ship without this fil
 - Changesets owns the version. Every change a user notices adds a changeset in `.changeset/`, written by hand as the commit-expert skill describes. Every changeset is a `patch` for now. Its summary starts with the skill's name, such as `triage: ask for a reproduction before labelling`.
 - The release workflow (`.github/workflows/release.yml`) runs on every push to `main`:
     1. It runs `pnpm check` first; a failure stops the release.
-    2. While changesets are pending, it opens or updates the `chore: release v<version>` PR. On the PR's branch it runs `pnpm changeset:version`, which bumps `package.json`, writes `CHANGELOG.md`, and copies the version into the three plugin manifests. `pnpm check` fails when a manifest's version differs from `package.json`.
+    2. While changesets are pending, it opens or updates the `chore: release v<version>` PR. On the PR's branch it runs `pnpm changeset:version`, which bumps `package.json`, writes `CHANGELOG.md`, and copies the version into each tool's plugin manifest. `pnpm check` fails when a manifest's version differs from `package.json`.
     3. Merging that PR tags the commit `v<version>` and creates the GitHub release.
 - The workflow opens the release PR with its own token, so CI does not run on the PR; step 1 checks it once it merges. The repository's Actions settings must allow GitHub Actions to create pull requests.
 - An installed copy stays on its version until the version changes. To try unreleased changes in Claude Code, load this folder for one session: `claude --plugin-dir <path to this repository>`.

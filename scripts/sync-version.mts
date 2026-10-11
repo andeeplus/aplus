@@ -8,7 +8,12 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-const MANIFESTS = ['.claude-plugin/plugin.json', '.codex-plugin/plugin.json', '.cursor-plugin/plugin.json'];
+const MANIFESTS = [
+	'.claude-plugin/plugin.json',
+	'.codex-plugin/plugin.json',
+	'.cursor-plugin/plugin.json',
+	'.github/plugin/plugin.json',
+];
 
 const root = path.resolve(import.meta.dirname, '..');
 const check = process.argv.includes('--check');
