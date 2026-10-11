@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5
+
+### Patch Changes
+
+- d04e654: Install aplus in GitHub Copilot from this repository.
+
 ## 0.1.4
 
 ### Patch Changes
