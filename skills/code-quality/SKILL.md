@@ -5,6 +5,7 @@ disable-model-invocation: true
 license: MIT (see LICENSE)
 metadata:
     author: cursor
+    vendored: 'true'
     source: https://github.com/cursor/plugins/blob/6e3d2ea56d7d446b955eaae6ac4c8eef8bf504cf/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md
 ---
 
@@ -71,6 +72,16 @@ Apply the baseline prompt above, plus these explicit review rules:
     - If independent work is serialized for no good reason, ask whether the flow should run in parallel instead.
     - If related updates can leave state half-applied, push for a more atomic structure.
     - Do not over-index on micro-optimizations, but do flag avoidable orchestration complexity that makes the implementation more brittle.
+
+### DRY and ETC
+
+8. **Keep shared knowledge in one place (DRY, Don't Repeat Yourself).**
+    - Consolidate rules, invariants and contracts that must change together; give them one owner and reuse it.
+    - Similar-looking code with independent reasons to change can stay separate. Extract an abstraction when the shared knowledge, not just the syntax, is the same.
+
+9. **Make the next change easier (ETC, Easier To Change).**
+    - Prefer cohesive modules, explicit contracts and local changes. Judge an abstraction by a concrete change it makes easier and the coupling it removes.
+    - Keep the direct implementation when a general mechanism adds more concepts or coordination than it saves. Name the maintenance cost and propose the smallest durable improvement inside the task's scope.
 
 ## Primary Review Questions
 

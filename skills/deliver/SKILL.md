@@ -7,14 +7,12 @@ description: Take an idea, a ticket or a program of issues to pull requests read
 
 Automatic from spec to PR, every gate included. It waits for the user only to review issue drafts and before a dangerous action.
 
-**Project specifics** (the integration branch, check commands, whether work needs an issue) come from the project's `AGENTS.md` and the project skill it names.
-
 ## Rules
 
 - **Ask before creating issues.** Show the drafts, delete the ones the user rejects, and create the rest.
 - **Ask before a dangerous action:** one that is hard to undo or reaches past the change, such as merging, force-pushing, deleting a branch or data, a migration that could break a running system or lose data, a deploy, or changing repository or CI settings.
-- **Ask for nothing else.** Asking to deliver approves each push, PR and PR body edit, and answers the waits in triage, final-review and create-pr.
-- **Park, don't stop.** When an issue cannot go on (a triage verdict other than `real bug` or `request`, work that already exists, an open decision, a stop from debug, or `not ready` after the second gate), record why, write a [handoff](../handoff/SKILL.md) note if it has a branch, skip the issues it blocks, and continue.
+- **Ask for nothing else.** Asking to deliver approves each push, PR and PR body edit, and answers the waits in triage, final-review and create-pr. Resolve a target, merge method or branch name from the project and the host skill.
+- **Park, don't stop.** When an issue cannot go on (a triage verdict other than `real bug` or `request`, work that already exists, an open decision, a question from debug that blocks the fix, or a `not ready` verdict), record why, write a [handoff](../handoff/SKILL.md) note if it has a branch, skip the issues it blocks, and continue.
 - **Build to the bar final-review applies** ([code-quality](../code-quality/SKILL.md)): the durable fix, inside the issue's scope, following the code around it. Work outside the scope becomes a draft.
 - **Keep the drafts in one scratch folder** outside the tree, unless the caller names one.
 
@@ -28,10 +26,10 @@ Automatic from spec to PR, every gate included. It waits for the user only to re
     - A bug: its [Gherkin scenario](../gherkin/SKILL.md#a-bugs-scenario), in the PR body when the ticket has none, then [debug](../debug/SKILL.md).
     - A task: for each acceptance scenario, a test that fails first ([testing](../testing/SKILL.md)), then the code that makes it pass.
     - A refactor: the existing tests stay green; add one first where none covers the behaviour.
-6. **Gate.** Run [final-review](../final-review/SKILL.md). Fix what fits the issue's scope, red checks included. Draft the rest with [create-issue](../create-issue/SKILL.md): a decision when the fix is unclear or a program of its own. Keep nits for the PR body. If you changed the branch, run final-review once more and draft any new out-of-scope finding. A drafted finding counts as logged, since the user reviews drafts at the end; with anything else left, park.
+6. **Gate.** Run [final-review](../final-review/SKILL.md). Fix what fits the issue's scope, red checks included. Draft the rest with [create-issue](../create-issue/SKILL.md): a decision when the fix is unclear or a program of its own. Keep nits for the PR body. If you changed the branch, run final-review once more and draft any new out-of-scope finding. Use final-review's verdict and deferral rules; when it remains `not ready`, park the issue and include its drafts in the report.
 7. **Commit** with [commit-expert](../commit-expert/SKILL.md).
 8. **Open the PR** with create-pr, naming each deferred finding by title.
-9. **Report** with the output below and every deferred draft. When the user answers, create the approved ones, link each from its PR, and remove rejected ones from the PR body.
+9. **Report** with the output below and every deferred draft. When the user answers, create the approved ones. When the issue opened a PR, link each from it and remove rejected ones from the PR body.
 
 ## Output
 

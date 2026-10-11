@@ -7,8 +7,6 @@ description: Ship gate for a finished change, with the project's checks, three p
 
 The last gate before a commit or pull request. Run it end to end without asking; the user reads one verdict.
 
-**Project specifics** (check commands, the base branch, release-note rules) come from the project's `AGENTS.md` and the project skill it names. If neither covers something, use the `package.json` scripts and the CI config.
-
 ## Scope
 
 The change under review is all three of:
@@ -19,15 +17,15 @@ The change under review is all three of:
 
 ## Flow
 
-1. **Checks.** Run the project's local gate: lint, typecheck and tests (its pre-commit or fast CI gate, where it has one). Also run any slower suite, such as end-to-end tests or a drift check, whose area the change touches, as the project's docs describe. A red result means `not ready`: go to step 6. Do not format by hand; format-on-save and the hooks own formatting.
+1. **Checks.** Read project instructions, build and test scripts, and CI configuration to identify the required checks. Run the project's local gate: lint, typecheck and tests (its pre-commit or fast CI gate, where it has one). Also run any slower suite, such as end-to-end tests or a drift check, whose area the change touches, as the project's docs describe. A red result means `not ready`: go to step 6. Do not format by hand; format-on-save and the hooks own formatting.
 
 2. **Review in parallel.** In one message, launch three read-only subagents. Each prompt contains the scope above, the absolute path of the skill file to apply (resolve the links below against this skill's folder), and the return format below. Pass the path because a subagent cannot invoke a skill by name.
 
-    | Reviewer     | Apply                                                          | Also checks                                                                                                                                                                                                                                         |
-    | ------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | Tests        | [testing](../testing/SKILL.md)                                 |                                                                                                                                                                                                                                                     |
-    | Code quality | [code-quality](../code-quality/SKILL.md)                       |                                                                                                                                                                                                                                                     |
-    | Docs         | [senior-technical-writer](../senior-technical-writer/SKILL.md) | The project's comment rules (its `AGENTS.md` or style guide). Where a folder whose behaviour changed has a README, it and any index that lists it are updated. A user-facing change has the release note the project requires, such as a changeset. |
+    | Reviewer     | Apply                                                          | Also checks                                                                                                                                                                                                              |
+    | ------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | Tests        | [testing](../testing/SKILL.md)                                 |                                                                                                                                                                                                                          |
+    | Code quality | [code-quality](../code-quality/SKILL.md)                       |                                                                                                                                                                                                                          |
+    | Docs         | [senior-technical-writer](../senior-technical-writer/SKILL.md) | The project's comment conventions. Where a folder whose behaviour changed has a README, it and any index that lists it are updated. A user-facing change has the release note the project requires, such as a changeset. |
 
     Each reviewer returns a list of findings with `file`, `line`, `summary` and `class`:
 
@@ -45,5 +43,7 @@ The change under review is all three of:
 
     - `ready to ship`: every check is green, no `easy` finding is left, and every `rework` finding is fixed or logged as an issue the user agreed to.
     - `not ready`: anything else.
+
+    A deferred `rework` finding is logged when its issue exists and the user agreed to defer it. A draft awaits that agreement. These verdict rules apply to every calling workflow.
 
     After the verdict, list what is left with `file:line` and the reason, including findings from step 5: rework first, then nits. Nits never block. Do not start rework unless asked.

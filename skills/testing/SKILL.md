@@ -7,7 +7,9 @@ description: Write, review and place automated tests that can fail. Use for writ
 
 A test exists to catch a behaviour change someone would care about. A test that cannot fail unless the test file itself changes is waste. Prefer a few tests that pin a contract over a suite that restates the implementation.
 
-**Project specifics** (test layers, commands, where files go, shared fixtures) come from the project's `AGENTS.md` and the project skill it names, then from the test config. Match the nearest existing test in the same package, and use the project's domain terms.
+## Rules
+
+- **Read the test configuration and package scripts.** Use them to identify supported layers and commands; follow nearby tests for placement and fixtures, and the code and docs for domain terms.
 
 ## References
 

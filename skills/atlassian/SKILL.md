@@ -7,9 +7,9 @@ description: Run Bitbucket Cloud, Jira and Confluence work through atlassian-cli
 
 Every product goes through [atlassian-cli](https://github.com/omar16100/atlassian-cli) 0.10.0 or later, with `-f json` when you read the output. Where a command lacks a field, `atlassian-cli <bb|jira|confluence> api <path>` calls the REST API with the stored credentials.
 
-**Project specifics** (workspace, repository, Jira project and issue types, Confluence space, merge strategy, the PR description's sections) come from the project's `AGENTS.md` and the project skill it names.
-
 ## Rules
+
+- **Resolve project settings.** Read the CLI profile, repository configuration and contribution guidance for the workspace, repository, Jira project and Confluence space. Read product settings for issue types and merge methods. When several targets remain, use the one recent comparable work uses.
 
 - **Ask before you publish,** unless the user asked for that exact action. Pushing, creating or editing PRs, issues, pages and comments, transitions and merging all publish.
 - **Keep tokens** in the CLI's stored profile or an environment variable.

@@ -30,7 +30,7 @@ gh issue close <n> --duplicate-of <m>                         # a duplicate of #
 
 ## Pull requests
 
-Name the issue as `<n>` in the branch, such as `feat/12-<slug>`, and as `Refs: #<n>` in each commit's footer: GitHub lists those commits on the issue. A PR body lists each issue it resolves as `Closes #<n>`. GitHub closes them only when the PR merges into the default branch.
+The branch is `type/ticket-slug`, as [create-pr](../../create-pr/SKILL.md) says. On GitHub the ticket is `<n>`, such as `fix/12-<slug>`, and each commit's footer is `Refs: #<n>`: GitHub lists those commits on the issue. A PR body lists each issue it resolves as `Closes #<n>`. GitHub closes them only when the PR merges into the default branch.
 
 ```sh
 git push -u origin <branch>
