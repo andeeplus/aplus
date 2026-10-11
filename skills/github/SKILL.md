@@ -7,9 +7,9 @@ description: Run GitHub work through gh, following the project's schema in .gith
 
 Every agent does GitHub work the same way: formats come from the repository's `.github/` folder, commands from the files below. Do not improvise a format, label or command they already define. What to do and when comes from [create-issue](../create-issue/SKILL.md) and [create-pr](../create-pr/SKILL.md).
 
-**Project specifics** (the integration branch, the merge method, milestone and label conventions, an alias for the issue script) come from the project's `AGENTS.md` and the project skill it names. If neither says, the integration branch is the default branch: `gh repo view --json defaultBranchRef`.
-
 ## Rules
+
+- **Read repository policy and settings.** Resolve the integration branch, merge method, labels, milestones and issue-script alias from contribution guidance, repository settings and `.github/`. When no integration branch is specified, use the default branch: `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`.
 
 - **Ask before you publish,** unless the user asked for that exact action. Pushing, creating or editing issues and PRs, commenting and merging all publish.
 - **Issues come from draft files.** Write a draft and run the issue script below. Never call `gh issue create` by hand: the script validates the draft against the issue forms and labels, then sets the type, labels, milestone, parent and "blocked by" links.

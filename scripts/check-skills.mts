@@ -1,6 +1,6 @@
 /**
  * Checks every skill: `SKILL.md` has a `name` equal to its folder and a `description`, a skill that is not vendored
- * (no `LICENSE` beside it) follows the shape in AGENTS.md, and every relative
+ * (without metadata.vendored set to "true") follows the shape in AGENTS.md, and every relative
  * Markdown link in `skills/`, `README.md` and `AGENTS.md` resolves, anchors included. Files in `assets/` are
  * templates that link relative to where they are copied, so they are skipped.
  *
@@ -91,6 +91,29 @@ export function shapeErrors(folder: string, source: string): string[] {
 	return errors;
 }
 
+/**
+ * True when `metadata.vendored` is true at the shallowest key indent. A deeper line does not count, and does not
+ * hide a shallower flag.
+ */
+export function isVendored(source: string): boolean {
+	const front = /^---\n([\s\S]*?)\n---/.exec(source)?.[1] ?? '';
+	const metadata = /^metadata:[ \t]*\n((?:[ \t]+\S[^\n]*(?:\n|$)|[ \t]*\n)*)/m.exec(front)?.[1] ?? '';
+	let indent: string | undefined;
+	for (const line of metadata.split('\n')) {
+		const next = /^[ \t]+(?=\S)/.exec(line)?.[0];
+		if (next !== undefined && (indent === undefined || next.length < indent.length)) indent = next;
+	}
+	if (indent === undefined) return false;
+	const shallow = indent;
+	return metadata
+		.split('\n')
+		.some(
+			(line) =>
+				line.startsWith(shallow) &&
+				/^vendored:[ \t]*(?:"true"|'true'|true)[ \t]*$/.test(line.slice(shallow.length)),
+		);
+}
+
 function markdownFiles(dir: string): string[] {
 	return readdirSync(dir).flatMap((entry) => {
 		const full = path.join(dir, entry);
@@ -104,11 +127,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
 	const errors = [
 		...readdirSync(skillsDir).flatMap((folder) => {
 			const source = readFileSync(path.join(skillsDir, folder, 'SKILL.md'), 'utf8');
-			const vendored = existsSync(path.join(skillsDir, folder, 'LICENSE'));
+			const vendored = isVendored(source);
 			return [...frontmatterErrors(folder, source), ...(vendored ? [] : shapeErrors(folder, source))];
 		}),
-		...[...markdownFiles(skillsDir), path.join(root, 'README.md'), path.join(root, 'AGENTS.md')].flatMap((file) =>
-			linkErrors(file, readFileSync(file, 'utf8')),
+		...[...markdownFiles(skillsDir), ...['README.md', 'AGENTS.md'].map((file) => path.join(root, file))].flatMap(
+			(file) => linkErrors(file, readFileSync(file, 'utf8')),
 		),
 	].map((error) => error.replaceAll(`${root}/`, ''));
 	for (const error of errors) console.error(`[error] ${error}`);

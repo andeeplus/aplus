@@ -60,11 +60,11 @@ Cursor has no install command for a plugin from GitHub. Use one of these:
 
 The skills are generic: they never name a project's commands, branches or paths. They read those from the project:
 
-| File                                                                                | Holds                                                                                                                   |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `AGENTS.md` at the repository root                                                  | Coding rules, the integration branch, the merge method, issue and pull request policy                                   |
-| A project skill that `AGENTS.md` names, such as `.agents/skills/<project>/SKILL.md` | A table pointing each need (checks, CI, test setup, release notes, issue forms) to the file that holds it               |
-| `.github/`                                                                          | Issue forms, `labels.yml` and the pull request template. The github skill's `--init` installs default forms and labels. |
+| Source                                         | Holds                                                                                                                   |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Project instructions and contribution guidance | Coding rules, the integration branch, the merge method, issue and pull request policy                                   |
+| Configuration, scripts, CI and nearby code     | Check commands, test setup, release requirements and existing patterns                                                  |
+| `.github/`                                     | Issue forms, `labels.yml` and the pull request template. The github skill's `--init` installs default forms and labels. |
 
 ## A development flow
 
@@ -79,12 +79,15 @@ The skills chain into one flow. Each step names the skill that runs it, and each
 
 [github](skills/github/SKILL.md) and [atlassian](skills/atlassian/SKILL.md) run the host commands for steps 2 and 5.
 
+[code-quality's design rules](skills/code-quality/SKILL.md#dry-and-etc) guide planning, implementation and review: DRY gives shared knowledge one owner, and ETC makes the next change easier. [plain](skills/plain/SKILL.md) writes a brief and a primer when an explanation for both audiences is requested.
+
 ## Skills
 
 | Skill                                                              | Use                                                                                                              |
 | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | [commit-expert](skills/commit-expert/SKILL.md)                     | Commit messages, PR titles, changelog lines and release notes; splitting work into commits                       |
 | [senior-technical-writer](skills/senior-technical-writer/SKILL.md) | Writing and reviewing docs against the code they describe                                                        |
+| [plain](skills/plain/SKILL.md)                                     | Explain a change in everyday words, as a brief and as a primer                                                   |
 | [testing](skills/testing/SKILL.md)                                 | Choosing a test layer and writing tests that can fail                                                            |
 | [gherkin](skills/gherkin/SKILL.md)                                 | Given/When/Then scenarios: every bug's expected behaviour, acceptance criteria, Cucumber feature files           |
 | [second-opinion](skills/second-opinion/SKILL.md)                   | A different agent and model reviews a finished change, read-only, in at most three rounds                        |

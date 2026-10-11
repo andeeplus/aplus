@@ -7,9 +7,9 @@ description: Write short, precise commit messages, PR titles, changelog lines, c
 
 Name the outcome, in the fewest precise words.
 
-**Project specifics** (allowed types and scopes, a title length limit, release-note rules) come from the project's `AGENTS.md` and the project skill it names, or its commit tooling config. They override the defaults below.
-
 ## Rules
+
+- **Follow project conventions.** Read contribution guidance, commit tooling and release configuration for types, scopes, title limits and release notes; use the defaults below where none are defined.
 
 - **One line** unless the user asks for a body. When the work has an issue, add a `Refs:` footer naming it in the host's form, so the host links the commit to the issue:
 

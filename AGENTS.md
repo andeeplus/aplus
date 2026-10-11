@@ -22,13 +22,14 @@ Inside a skill, progressive disclosure keeps what an agent loads small:
 ## Rules for skills
 
 - **Concise.** Say each thing once, in as few words as it needs. Keep `SKILL.md` to the core flow and a routing table, with detail in references, where that split helps. Be pragmatic about size: a longer skill that reads best as one file stays one file.
-- **Generic.** A skill names no project, command, branch or path. For those it defers to the project's `AGENTS.md` and the project skill it names. A workflow skill names no host or tracker either: it defers to the platform skill, such as `github`.
+- **Generic.** A skill names no project, command, branch or path. For those it follows project instructions and resolves missing details from configuration, scripts, CI and nearby code. A workflow skill names no host or tracker either: it defers to the platform skill, such as `github`.
 - **Script it.** If two agents could do a step differently, write a script and make `SKILL.md` say to run it. Never reimplement a script's job by hand.
 - **Schemas live in the project.** Issue forms, labels and the pull request template are in the project's `.github/`. Skills read them; they do not restate them.
 - **Current only.** Skills, docs and commit messages describe what is supported now. Leave out what was renamed, replaced, deprecated or removed, and its old names.
 - **Say what to do.** Describe the supported path. Do not describe an action a skill does not support, even to forbid it: naming it suggests it.
 - **Link, don't copy.** Skills link to each other with relative paths, such as `../final-review/SKILL.md`.
-- **Vendored files** keep their license beside them and a link to their source.
+- **Attribute third-party material.** Keep the license beside the skill, with its source revision and a short note of local modifications.
+- **Mark imported entry points.** An imported entry point sets `metadata.vendored: "true"` in frontmatter to retain its source's shape. An aplus entry point follows the local skill shape.
 
 ## Shape of a `SKILL.md`
 
@@ -36,7 +37,7 @@ An agent reads top to bottom and acts early, so a skill puts each part before th
 
 1. **`description`:** what the skill does, then a sentence starting `Use` that lists the words a user types for it. It is all a harness reads to decide whether to load the skill: keep the trigger words.
 2. **`# Title`**, then one line: the contract, or the stance the skill takes. A skill with a long flow adds it as one line, such as `clarify → audit → ship`.
-3. **Project line**, when the skill depends on the project: "**Project specifics** (_what_) come from the project's `AGENTS.md` and the project skill it names."
+3. **Project context**, when needed, is a rule or a flow step: name the instructions, configuration or conventions the task reads.
 4. **`## Rules`:** bullets that start with a bold imperative.
 5. **`## References`:** a `Task | Read` table, one row per reference.
 6. **Domain sections,** named by noun, such as `Format` or `Posture`: the knowledge the skill applies.
@@ -52,7 +53,6 @@ One word per concept, in every skill and reference. Skills ship without this fil
 | ---------------------- | ------------------------------------------------------------------------------------ |
 | **publish**            | Any action others see: push, open or edit a PR or issue, comment, transition, merge. |
 | **host**, **tracker**  | Where code and PRs live; where issues live.                                          |
-| **project skill**      | The skill the project's `AGENTS.md` names.                                           |
 | **integration branch** | The branch PRs target.                                                               |
 | **gate**, **verdict**  | A check that must pass; its one-line result.                                         |
 | **finding**            | A review result, classed `easy`, `nit` or `rework`.                                  |
