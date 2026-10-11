@@ -41,9 +41,9 @@ The change under review is all three of:
 
 6. **Verdict.** End with exactly one of:
 
-    - `ready to ship`: every check is green, no `easy` finding is left, and every `rework` finding is fixed or logged as an issue the user agreed to.
+    - `ready to ship`: every check is green, no `easy` finding is left, and every `rework` finding is fixed or logged.
     - `not ready`: anything else.
 
-    A deferred `rework` finding is logged when its issue exists and the user agreed to defer it. A draft awaits that agreement. These verdict rules apply to every calling workflow.
+    A deferred `rework` finding is logged when its issue exists and the user agreed to defer it, or when the calling workflow has drafted it for the user to review after the PR opens.
 
     After the verdict, list what is left with `file:line` and the reason, including findings from step 5: rework first, then nits. Nits never block. Do not start rework unless asked.

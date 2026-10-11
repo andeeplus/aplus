@@ -2,6 +2,6 @@
 'aplus': patch
 ---
 
-final-review: require an approved issue for deferred rework across calling workflows
+final-review: count a deferred rework as logged once its issue is agreed, or drafted for review after the PR
 
-deliver: park work that remains not ready and report its deferred drafts
+deliver: open the PR with out-of-scope rework drafted, and park work that is still not ready
