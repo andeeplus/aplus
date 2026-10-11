@@ -6,7 +6,7 @@
 ██  ██   █     █████▀ ██ ▀█▄ ██ ██████ ██████ █████▀
 ```
 
-Agent skills for shipping changes with care: a ship gate before every commit or pull request, a second opinion from a different model, audits that become issues, stacked pull requests, and Gherkin scenarios for every bug. They work in Claude Code, Codex, Cursor, OpenCode and Pi.
+Agent skills for shipping changes with care: a ship gate before every commit or pull request, a second opinion from a different model, audits that become issues, stacked pull requests, and Gherkin scenarios for every bug. They work in Claude Code, Codex, Cursor, GitHub Copilot, OpenCode and Pi.
 
 ## Install
 
@@ -55,6 +55,28 @@ Cursor has no install command for a plugin from GitHub. Use one of these:
     On Teams and Enterprise, an admin must turn on **Allow Local Plugin Imports**.
 
 - **For a team** (Teams and Enterprise): in the Cursor dashboard, open **Plugins & MCPs**, select **Add Marketplace**, then **Import from Repo** with `https://github.com/andeeplus/aplus`.
+
+### GitHub Copilot
+
+```sh
+copilot plugin marketplace add andeeplus/aplus
+copilot plugin install aplus@andeeplus
+```
+
+Run `copilot plugin update aplus` to update.
+
+For a repository, add `.github/copilot/settings.json`. Copilot CLI and the cloud agent both read it:
+
+```json
+{
+	"extraKnownMarketplaces": {
+		"andeeplus": {
+			"source": { "source": "github", "repo": "andeeplus/aplus" }
+		}
+	},
+	"enabledPlugins": { "aplus@andeeplus": true }
+}
+```
 
 ## Use it in a project
 
