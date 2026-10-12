@@ -101,30 +101,30 @@ The skills chain into one flow. Each step names the skill that runs it, and each
 
 [github](skills/github/SKILL.md) and [atlassian](skills/atlassian/SKILL.md) run the host commands for steps 2 and 5.
 
-[code-quality's design rules](skills/code-quality/SKILL.md#dry-and-etc) guide planning, implementation and review: DRY gives shared knowledge one owner, and ETC makes the next change easier. [plain](skills/plain/SKILL.md) writes a brief and a primer when an explanation for both audiences is requested.
+[code-quality's design rules](skills/code-quality/SKILL.md#dry-and-etc) guide planning, implementation and review: DRY gives shared knowledge one owner, orthogonality keeps concerns apart where the project already does, and ETC makes the next change easier. Orthogonality is a preference: a review blocks on it only when the user asks. [plain](skills/plain/SKILL.md) writes a brief and a primer when an explanation for both audiences is requested.
 
 ## Skills
 
-| Skill                                                              | Use                                                                                                              |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| [commit-expert](skills/commit-expert/SKILL.md)                     | Commit messages, PR titles, changelog lines and release notes; splitting work into commits                       |
-| [senior-technical-writer](skills/senior-technical-writer/SKILL.md) | Writing and reviewing docs against the code they describe                                                        |
-| [plain](skills/plain/SKILL.md)                                     | Explain a change in everyday words, as a brief and as a primer                                                   |
-| [testing](skills/testing/SKILL.md)                                 | Choosing a test layer and writing tests that can fail                                                            |
-| [gherkin](skills/gherkin/SKILL.md)                                 | Given/When/Then scenarios: every bug's expected behaviour, acceptance criteria, Cucumber feature files           |
-| [second-opinion](skills/second-opinion/SKILL.md)                   | A different agent and model reviews a finished change, read-only, in at most three rounds                        |
-| [final-review](skills/final-review/SKILL.md)                       | Ship gate: checks, three parallel reviews, one fix round, a second opinion, a ready or not-ready verdict         |
-| [create-issue](skills/create-issue/SKILL.md)                       | Issues that stand alone: duplicate check, problem and evidence first, programs of ordered issues                 |
-| [create-pr](skills/create-pr/SKILL.md)                             | Open pull requests: one per issue, dependent work stacked, reviews answered, merged only when asked              |
-| [atlassian](skills/atlassian/SKILL.md)                             | Bitbucket pull requests and pipelines, Jira issues, Confluence pages, through atlassian-cli                      |
-| [github](skills/github/SKILL.md)                                   | Issues from validated draft files, pull requests and stacks with gh-stack, checks and reviews through gh         |
-| [audit](skills/audit/SKILL.md)                                     | Audit an area into local notes, turn findings into issues, carry them through to merged PRs                      |
-| [deliver](skills/deliver/SKILL.md)                                 | Take an idea, a ticket or a program of issues to pull requests ready to merge, running the other skills in order |
-| [define](skills/define/SKILL.md)                                   | Turn an idea or a ticket into a spec: problem, scope, code touched, Gherkin acceptance, open decisions           |
-| [triage](skills/triage/SKILL.md)                                   | Decide what to do with a ticket: is it real, where does it live, bug, misuse or request                          |
-| [debug](skills/debug/SKILL.md)                                     | Find a bug's root cause with a loop that fails, then fix it behind a regression test                             |
-| [handoff](skills/handoff/SKILL.md)                                 | Pause work into a note a fresh agent can resume from                                                             |
-| [code-quality](skills/code-quality/SKILL.md)                       | Strict maintainability check of the current branch's changes; final-review's code-quality reviewer               |
+| Skill                                                              | Use                                                                                                                                 |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| [commit-expert](skills/commit-expert/SKILL.md)                     | Commit messages, PR titles, changelog lines and release notes; splitting work into commits                                          |
+| [senior-technical-writer](skills/senior-technical-writer/SKILL.md) | Writing and reviewing docs against the code they describe                                                                           |
+| [plain](skills/plain/SKILL.md)                                     | Explain a change in everyday words, as a brief and as a primer                                                                      |
+| [testing](skills/testing/SKILL.md)                                 | Choosing a test layer and writing tests that can fail                                                                               |
+| [gherkin](skills/gherkin/SKILL.md)                                 | Given/When/Then scenarios: every bug's expected behaviour, acceptance criteria, Cucumber feature files                              |
+| [second-opinion](skills/second-opinion/SKILL.md)                   | A different agent and model reviews a finished change, read-only, in at most three rounds                                           |
+| [final-review](skills/final-review/SKILL.md)                       | Ship gate: checks, three parallel reviews, one fix round, a second opinion, a ready or not-ready verdict                            |
+| [create-issue](skills/create-issue/SKILL.md)                       | Issues that stand alone: duplicate check, problem and evidence first, programs of ordered issues                                    |
+| [create-pr](skills/create-pr/SKILL.md)                             | Open pull requests: one per issue, dependent work stacked, reviews answered, merged only when asked                                 |
+| [atlassian](skills/atlassian/SKILL.md)                             | Bitbucket pull requests and pipelines, Jira issues, an optional board, Confluence pages, through atlassian-cli                      |
+| [github](skills/github/SKILL.md)                                   | Issues from validated draft files, pull requests and stacks with gh-stack, an optional project board, checks and reviews through gh |
+| [audit](skills/audit/SKILL.md)                                     | Audit an area into local notes, turn findings into issues, carry them through to merged PRs                                         |
+| [deliver](skills/deliver/SKILL.md)                                 | Take an idea, a ticket or a program of issues to pull requests ready to merge, running the other skills in order                    |
+| [define](skills/define/SKILL.md)                                   | Turn an idea or a ticket into a spec: problem, scope, code touched, Gherkin acceptance, open decisions                              |
+| [triage](skills/triage/SKILL.md)                                   | Decide what to do with a ticket: is it real, where does it live, bug, misuse or request                                             |
+| [debug](skills/debug/SKILL.md)                                     | Find a bug's root cause with a loop that fails, then fix it behind a regression test                                                |
+| [handoff](skills/handoff/SKILL.md)                                 | Pause work into a note a fresh agent can resume from                                                                                |
+| [code-quality](skills/code-quality/SKILL.md)                       | Strict maintainability check of the current branch's changes; final-review's code-quality reviewer                                  |
 
 ## Versions
 

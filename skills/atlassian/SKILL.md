@@ -1,6 +1,6 @@
 ---
 name: atlassian
-description: Run Bitbucket Cloud, Jira and Confluence work through atlassian-cli. Use for Bitbucket PRs, stacks, pipelines and merges; Jira issues, links, comments and transitions; Confluence pages for specs and ADRs; and CLI setup.
+description: Run Bitbucket Cloud, Jira and Confluence work through atlassian-cli. Use for Bitbucket PRs, stacks, pipelines and merges; Jira issues, links, comments, transitions and a board; Confluence pages for specs and ADRs; and CLI setup.
 ---
 
 # Atlassian
@@ -11,7 +11,8 @@ Every product goes through [atlassian-cli](https://github.com/omar16100/atlassia
 
 - **Resolve project settings.** Read the CLI profile, repository configuration and contribution guidance for the workspace, repository, Jira project and Confluence space. Read product settings for issue types and merge methods. When several targets remain, use the one recent comparable work uses.
 
-- **Ask before you publish,** unless the user asked for that exact action. Pushing, creating or editing PRs, issues, pages and comments, transitions and merging all publish.
+- **Ask before you publish,** unless the user asked for that exact action, or the [board](#board) mapping already approves the transition. Pushing, creating or editing PRs, issues, pages and comments, transitions and merging all publish.
+- **A board is optional.** Follow [Board](#board).
 - **Keep tokens** in the CLI's stored profile or an environment variable.
 - **Use scratch files** outside the tree for PR descriptions and issue and page bodies, so they are never committed.
 
@@ -22,7 +23,16 @@ Every product goes through [atlassian-cli](https://github.com/omar16100/atlassia
 | Install the CLI, create tokens, log in, check permissions | [references/setup.md](references/setup.md)           |
 | Pull requests, stacks, reviews, pipelines, merging        | [references/bitbucket.md](references/bitbucket.md)   |
 | Jira issues: draft, create, link, comment, transition     | [references/jira.md](references/jira.md)             |
+| Move an issue on a board                                  | [references/jira.md](references/jira.md#board)       |
 | Confluence pages: concepts, specs, ADRs, RFCs             | [references/confluence.md](references/confluence.md) |
+
+## Board
+
+A Jira board is a view of issues in a project. Creating an issue does not need one. With none, skip it. With one, use it; with several, ask which.
+
+1. List the boards and statuses ([jira.md: Board](references/jira.md#board)) and ask once which status is in progress, which is in review, and which is done. Skip a step the user leaves unset. That answer approves the later transitions.
+2. Confirm the issue shows on the board after creating it: a Scrum board puts it in the backlog, and a board's filter can leave it out.
+3. Set in progress when work on it starts, in review when its PR opens, and done when that PR merges, not when work on the issue finishes.
 
 ## Script
 

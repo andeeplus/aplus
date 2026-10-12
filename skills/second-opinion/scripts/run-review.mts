@@ -31,8 +31,8 @@ const USAGE =
 const MAX_PROMPT_BYTES = 120_000;
 
 /**
- * Matches a fast variant such as `grok-4.7-high-fast`, but not Cursor's `[fast=false]` override. Reviews always run
- * on the full model.
+ * Matches a fast variant such as `grok-4.7-high-fast`, but not Cursor's `[fast=false]` override. A model the agent
+ * picks must be the full model; a listed reviewer may be `*-fast`.
  */
 const FAST_MODEL = /\bfast\b(?!=false)/i;
 
@@ -128,7 +128,7 @@ export function family(model: string): string {
 
 /**
  * Parses `APLUS_SECOND_OPINION_REVIEWERS`, a comma-separated list of `harness:model[@effort]`, and checks every entry, so a
- * typo fails even when an earlier entry is picked. A comma inside brackets, as in Cursor's
+ * typo fails even when an earlier entry is picked. A listed `*-fast` id is kept. A comma inside brackets, as in Cursor's
  * `model[effort=high,fast=false]`, belongs to the id.
  */
 function parseReviewers(list: string): Reviewer[] {
@@ -147,15 +147,16 @@ function parseReviewers(list: string): Reviewer[] {
  *
  * @remarks
  * Cursor names the effort in the model id, such as `grok-4.7-high` or `model[effort=low]`, so it takes no suffix.
+ * A listed `*-fast` id is kept; `--model` refuses one after this returns.
  */
 function reviewer(harness: string, spec: string): Reviewer {
 	const [, model = spec, effort] = EFFORT.exec(spec) ?? [];
 	if (!HARNESSES[harness]) {
 		throw new Error(`The harness "${harness}" is not supported. Use one of ${Object.keys(HARNESSES).join(', ')}.`);
 	}
-	if (!model || FAST_MODEL.test(model)) {
+	if (!model) {
 		throw new Error(
-			`The model for ${harness} is ${model ? `"${model}", a fast variant` : 'not set'}. Set an exact model id without "fast"; a harness default or a bare alias can resolve to a fast variant.`,
+			`The model for ${harness} is not set. Set an exact model id; a harness default or a bare alias can resolve to a fast variant.`,
 		);
 	}
 	if (effort && harness === 'cursor') {
@@ -234,6 +235,11 @@ if (isMain) {
 	let picked: Reviewer | undefined;
 	if (values.harness !== undefined && values.model !== undefined) {
 		picked = reviewer(values.harness, values.model);
+		if (FAST_MODEL.test(picked.model)) {
+			throw new Error(
+				`The model for ${picked.harness} is "${picked.model}", a fast variant. Set an exact model id without "fast"; a harness default or a bare alias can resolve to a fast variant.`,
+			);
+		}
 	} else {
 		const own = family(values.self ?? '');
 		picked = parseReviewers(process.env.APLUS_SECOND_OPINION_REVIEWERS ?? '').find(

@@ -13,6 +13,17 @@ The format is [the GitHub draft format](../../github/references/issues.md#the-dr
 
 It creates parents before children and blockers first, reads each "blocks" link back and corrects an inverted one, and records `key → Jira key` in `manifest.json` beside the drafts, so a re-run creates only what is missing. A project that requires a custom field is rejected: create that issue with the commands below and `--field`.
 
+## Board
+
+The [board](../SKILL.md#board) is optional. Creating an issue does not need one. `<P>` is the Jira project key.
+
+```sh
+atlassian-cli -f json jira api /rest/agile/1.0/board --query projectKeyOrId=<P>
+atlassian-cli -f json jira api /rest/api/3/project/<P>/statuses
+```
+
+The statuses are the `--to-status` names, grouped by issue type. Board column titles can differ. Transition with the command in [Other commands](#other-commands). When several boards exist, ask which in the same question as the statuses.
+
 ## Other commands
 
 ```sh

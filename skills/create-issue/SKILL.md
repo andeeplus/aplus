@@ -25,4 +25,4 @@ The draft format, commands and creation script come from the skill for the proje
 
 1. Search for a duplicate, open or closed.
 2. Draft each issue in the tracker skill's format, using the project's closest kind: a bug, a task, or a decision for a question a maintainer must answer first.
-3. Validate and show the user what would be created. Create only after they approve.
+3. Validate and show the user what would be created. Create only after they approve, then follow the tracker skill's board.

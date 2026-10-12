@@ -21,6 +21,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 Local modifications by aplus: renamed the skill to code-quality, retitled it,
-and replaced its trigger words; added the DRY and ETC rules and vendoring
-metadata. The original MIT notice above is unchanged.
+and replaced its trigger words; added the DRY and ETC rules, a note on
+orthogonality, and vendoring metadata. The original MIT notice above is unchanged.
 Source: https://github.com/cursor/plugins/blob/6e3d2ea56d7d446b955eaae6ac4c8eef8bf504cf/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md
