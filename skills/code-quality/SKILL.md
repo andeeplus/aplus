@@ -79,6 +79,8 @@ Apply the baseline prompt above, plus these explicit review rules:
     - Consolidate rules, invariants and contracts that must change together; give them one owner and reuse it.
     - Similar-looking code with independent reasons to change can stay separate. Extract an abstraction when the shared knowledge, not just the syntax, is the same.
 
+    **Orthogonality** is a preference. Do not unmix a project that already mixes concerns. Where the code already keeps two concerns apart, this change should not make one require a change to the other. When you can ask the user, ask once whether this review should treat it as blocking. Otherwise, flag a miss and do not block.
+
 9. **Make the next change easier (ETC, Easier To Change).**
     - Prefer cohesive modules, explicit contracts and local changes. Judge an abstraction by a concrete change it makes easier and the coupling it removes.
     - Keep the direct implementation when a general mechanism adds more concepts or coordination than it saves. Name the maintenance cost and propose the smallest durable improvement inside the task's scope.
@@ -92,6 +94,7 @@ For every meaningful change, ask:
 - Does this improve or worsen the local architecture?
 - Did the diff add branching complexity where a better abstraction should exist?
 - Did a previously cohesive module become more coupled, more stateful, or harder to scan?
+- Did this change couple two concerns the code already kept separate?
 - Is this logic living in the right file and layer?
 - Did this change enlarge a file or component past a healthy size boundary?
 - Are there repeated conditionals that signal a missing model or missing helper?
@@ -180,6 +183,7 @@ Prioritize findings in this order:
 
 Do not flood the review with low-value nits if there are larger structural issues.
 Prefer a smaller number of high-conviction comments over a long list of cosmetic notes.
+Do not treat an orthogonality miss as a blocker unless the user asked to treat it as blocking. Do not reclassify that miss as a presumptive blocker below.
 
 ## Approval Bar
 

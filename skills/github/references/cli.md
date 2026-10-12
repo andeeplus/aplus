@@ -28,6 +28,20 @@ gh issue close <n> --reason "not planned" --comment "<why>"   # won't fix
 gh issue close <n> --duplicate-of <m>                         # a duplicate of #<m>
 ```
 
+## Board
+
+The [board](../SKILL.md#board) is optional. `<owner>` is the repository owner: `gh repo view --json owner --jq .owner.login`. The token needs the `project` scope, shown by `gh auth status`. When it lacks `project`, ask the user to run `gh auth refresh -s project`.
+
+```sh
+gh repo view --json projectsV2 --jq '.projectsV2.Nodes[] | {number, title}'
+gh project field-list <number> --owner <owner> --format json --jq '.fields[] | select(.options) | {name, options: [.options[].name]}'
+gh issue view <n> --json url --jq .url
+gh project item-add <number> --owner <owner> --url <issue-url>
+gh project item-edit <number> --owner <owner> --url <issue-url> --field "<field>" --value "<option>"
+```
+
+One single-select field is the column. When several fields have options, ask which field in the same question as the options.
+
 ## Pull requests
 
 The branch is `type/ticket-slug`, as [create-pr](../../create-pr/SKILL.md) says. On GitHub the ticket is `<n>`, such as `fix/12-<slug>`, and each commit's footer is `Refs: #<n>`: GitHub lists those commits on the issue. A PR body lists each issue it resolves as `Closes #<n>`. GitHub closes them only when the PR merges into the default branch.

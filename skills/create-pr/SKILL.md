@@ -28,4 +28,4 @@ Commands and formats come from the skill for the project's host, such as [github
 1. Get a `ready to ship` verdict from [final-review](../final-review/SKILL.md) for the branch as it is now.
 2. Write the title, and the release note the project requires, with [commit-expert](../commit-expert/SKILL.md).
 3. Fill in the project's PR template in a scratch file outside the tree. Link each issue the PR resolves.
-4. Push and open it against the integration branch.
+4. Push and open it against the integration branch, then set in review as the host skill's board says.

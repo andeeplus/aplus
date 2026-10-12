@@ -121,13 +121,27 @@ test('fails, rather than skipping, when any listed entry is not supported', () =
 	expect(existsSync(log)).toBe(false);
 });
 
-test('refuses a fast model variant without calling a harness', () => {
+test('runs a listed fast model as set', () => {
 	writeFileSync(path.join(repo, '.env'), 'APLUS_SECOND_OPINION_REVIEWERS=cursor:grok-4.7-high-fast\n');
 	const result = run('--self', 'opus');
+
+	expect(result.status).toBe(0);
+	expect(harnessCall().argv).toEqual(expect.arrayContaining(['--model', 'grok-4.7-high-fast']));
+});
+
+test('refuses a fast model the agent picks with --model', () => {
+	const result = run('--harness', 'cursor', '--model', 'grok-4.7-high-fast');
 
 	expect(result.status).not.toBe(0);
 	expect(result.stderr).toContain('a fast variant');
 	expect(existsSync(log)).toBe(false);
+});
+
+test('allows Cursor fast=false on --model', () => {
+	const result = run('--harness', 'cursor', '--model', 'claude-opus-4-8[effort=high,fast=false]');
+
+	expect(result.status).toBe(0);
+	expect(harnessCall().argv).toEqual(expect.arrayContaining(['--model', 'claude-opus-4-8[effort=high,fast=false]']));
 });
 
 test('sends the brief, the round, the notes, every change since the merge base and the untracked files to the first reviewer from another family, with its harness key under the variable the harness reads', () => {
