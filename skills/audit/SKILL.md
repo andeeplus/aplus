@@ -7,7 +7,7 @@ description: Audit a codebase area's design and defects into local notes, file t
 
 **clarify → audit → issues (on request) → execute (on request) → hand off**
 
-Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). Issues on the project's tracker are the plan: the audit is local working notes, and anything that must outlive it becomes an issue.
+Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). The audit is local working notes. An issue on the project's tracker carries the intent of a change and outlives the audit; the audit entries it covers are the steps its builder reads. Anything that must outlive the audit becomes an issue.
 
 ## Rules
 
@@ -44,19 +44,20 @@ Artifacts go under the audit dir. Check that it is gitignored when it is inside 
 
 - **Date folder:** the date the program's first audit started. Everything for that program, including other authors' reviews, drafts and later days' work, stays in it, so the drafts share one `manifest.json`.
 - **Author slug:** kebab-case, such as `claude-opus`.
-- **Keys** are short and stable (`B1`, `T2`, `M3`); issue drafts reuse them.
+- **Keys** are short and stable (`B1`, `T2`, and `M2.1` for a move under `T2`); each issue draft lists the ones it covers.
 
 ## Clarify
 
 Ask the open questions in one round; skip what the request already answers.
 
-| Topic       | Options                                              | Default                   |
-| ----------- | ---------------------------------------------------- | ------------------------- |
-| Scope       | A folder, package or subsystem                       | Inferred from the request |
-| Posture     | `strict` or `balanced`                               | `strict`                  |
-| Baseline    | The current tree, or a branch or commit              | The current tree          |
-| Cross-audit | One author, or several models auditing independently | One author                |
-| Issues      | Audit only, or also file issues                      | Audit only                |
+| Topic       | Options                                                                            | Default                   |
+| ----------- | ---------------------------------------------------------------------------------- | ------------------------- |
+| Scope       | A folder, package or subsystem                                                     | Inferred from the request |
+| Posture     | `strict` or `balanced`                                                             | `strict`                  |
+| Baseline    | The current tree, or a branch or commit                                            | The current tree          |
+| Cross-audit | One author, or several models auditing independently                               | One author                |
+| Issues      | Audit only, or also file issues                                                    | Audit only                |
+| Issue size  | `finding`, `pr` or `outcome` ([create-issue: size](../create-issue/SKILL.md#size)) | `pr`                      |
 
 Write nothing until scope and posture are confirmed.
 
@@ -77,24 +78,26 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --sy
 
 ## Issues (on request)
 
-1. Draft one file per issue in `issues/` with [create-issue](../create-issue/SKILL.md):
+1. Draft one file per issue in `issues/` with [create-issue](../create-issue/SKILL.md), at the issue size from Clarify:
 
-    | Source                            | Draft                             |
-    | --------------------------------- | --------------------------------- |
-    | Each `bugs.md` entry              | A bug                             |
-    | Each `program.md` theme           | A tracking issue                  |
-    | Each move under a theme           | A task with `parent: {theme-key}` |
-    | Each open question in `README.md` | A decision                        |
+    | Source                            | Draft                                                                                           |
+    | --------------------------------- | ----------------------------------------------------------------------------------------------- |
+    | `bugs.md` entries                 | Bugs, each `blockedBy` the task whose change is the right fix when the two stay separate issues |
+    | Moves under a theme               | Tasks                                                                                           |
+    | A theme larger than one issue     | A tracking issue, with its tasks as children                                                    |
+    | Each open question in `README.md` | A decision                                                                                      |
 
     Use the closest form the project has for each kind. A balanced audit yields bugs and decisions only.
 
-2. Create them as create-issue says: duplicate check, show the user, create only after they confirm.
+2. Link each draft to the audit with an `audit` list in its frontmatter, such as `audit: [T2, M2.1, M2.3]`. The issue script does not publish it. The body carries the intent from the audit: the problem with its evidence, the design the change reaches, and the acceptance. The audit keeps the steps.
+3. Create them as create-issue says: duplicate check, show the user each draft with its `audit` keys, create only after they confirm.
 
 ## Execute (on request)
 
 Run the program's open change issues with [deliver](../deliver/SKILL.md). Within an audit:
 
 - Deliver's draft folder is the program's `issues/`, so its drafts share the `manifest.json`.
+- Before building an issue, match it to its draft in `issues/` (`manifest.json` maps each draft key to its issue) and read the audit entries that draft's `audit` list names. They are the steps, and may change while building; the issue's acceptance is what must hold.
 - A finding that is a program of its own stays a decision draft; propose an audit for it at hand off.
 - Keep audit keys and audit dir paths out of branch names, titles and bodies.
 
