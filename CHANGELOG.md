@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.1.6
+
+### Patch Changes
+
+- c6e0c5e: code-quality: treat orthogonality as a preference unless the user asks to treat it as blocking, and do not unmix a project that already mixes concerns
+- c6e0c5e: github: move an issue on a project board when the repository has one, after one question about its statuses, and set done only when the PR merges
+
+    atlassian: the same for a Jira board; creating an issue does not need one
+
+    deliver: ask that question once when a board exists, then move the issue as the host skill says
+
+- d4157b4: github: install a default pull request template with --init, and run --init when the project has none
+- 10dcb21: audit: ask the issue size (finding, pr or outcome) and group drafts to it, and link each draft to its audit entries locally
+
+    create-issue: let the user pick the issue size, finding, pr or outcome, and carry the intent, leaving the steps to whoever builds it
+
+    deliver: ship an issue too big for one pull request as a stack, one branch per slice
+
+    define: split work at the issue size the user picks
+
+- c6e0c5e: second-opinion: run a listed `*-fast` reviewer as set, and refuse a fast id only when the agent picks the model
+
 ## 0.1.5
 
 ### Patch Changes
