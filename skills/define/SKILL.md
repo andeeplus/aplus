@@ -23,7 +23,7 @@ A spec is the problem, scope, code, acceptance criteria and open decisions of on
 3. **Note the gaps:** what the request leaves open about the problem, who has it, scope and constraints. Build on stated assumptions, and keep the questions for the review.
 4. **Map the code.** Trace where the change lands: the entry points, the modules it touches, the nearby patterns to follow, and the behaviour that must not change. Assess design options with [code-quality's design rules](../code-quality/SKILL.md#dry-and-etc).
 5. **Specify.** Write the acceptance criteria as [Gherkin scenarios](../gherkin/SKILL.md): the main path, then each edge and failure that matters. List the non-goals, the risks and the open decisions.
-6. **Size.** One PR when it lands as one reviewable change. Otherwise a program: one change per child issue in "blocked by" order, and a decision issue per open question, as [create-issue: programs](../create-issue/references/programs.md) says.
+6. **Size.** One issue when the work is one outcome a reviewer can check. Otherwise split it at the size the user picks ([create-issue: size](../create-issue/SKILL.md#size)), with a decision issue per open question; issues that reach one goal in order are a program ([create-issue: programs](../create-issue/references/programs.md)).
 7. **Review.** Show the spec with its questions, and the drafts the caller asked for: issues written with [create-issue](../create-issue/SKILL.md), and for a ticket its edit or comment in a scratch file outside the tree. Wait for one approval, then publish what the user approves through the tracker's skill.
 
 ## Output
@@ -40,5 +40,5 @@ Acceptance:
 Risks: <what could go wrong> | none
 Decisions: <question: options and trade-offs> | none
 Assumptions: <claims not verified> | none
-Size: one PR | program of <n> changes
+Size: one issue | <n> issues sized finding, pr or outcome | program of <n> issues sized finding, pr or outcome
 ````
