@@ -208,14 +208,21 @@ describe('default forms', () => {
 		(files) => {
 			const repo = tempRepo(files);
 			expect(() => readSchema(repo)).toThrow(
-				`No issue forms in ${path.join(repo, '.github/ISSUE_TEMPLATE')}. Drafts are validated against them. Default forms and labels are in ${path.resolve(import.meta.dirname, '../assets')}; install them with --init.`,
+				`No issue forms in ${path.join(repo, '.github/ISSUE_TEMPLATE')}. Drafts are validated against them. Default forms, labels and pull request template are in ${path.resolve(import.meta.dirname, '../assets')}; install them with --init.`,
 			);
 		},
 	);
 
-	test('install writes the forms and labels, and keeps only the issue types the repository has', () => {
+	test('install writes the forms, labels and pull request template, and keeps only the issue types the repository has', () => {
 		const repo = tempRepo({ '.github/.keep': '' });
-		expect(installDefaults(repo, new Set(['Bug'])).sort()).toEqual([...DEFAULT_FORMS, '.github/labels.yml']);
+		expect(installDefaults(repo, new Set(['Bug'])).sort()).toEqual([
+			...DEFAULT_FORMS,
+			'.github/labels.yml',
+			'.github/pull_request_template.md',
+		]);
+		expect(readFileSync(path.join(repo, '.github/pull_request_template.md'), 'utf8')).toBe(
+			readFileSync(path.join(import.meta.dirname, '../assets/pull_request_template.md'), 'utf8'),
+		);
 		const { forms, labels } = readSchema(repo);
 		expect([...forms].map(([name, form]) => [name, form.type, form.labels])).toEqual([
 			['bug', 'Bug', []],
@@ -232,10 +239,11 @@ describe('default forms', () => {
 		]);
 	});
 
-	test('install keeps an existing labels.yml', () => {
-		const repo = tempRepo({ '.github/labels.yml': 'mine' });
+	test('install keeps an existing labels.yml and pull request template', () => {
+		const repo = tempRepo({ '.github/labels.yml': 'mine', '.github/pull_request_template.md': 'mine too' });
 		expect(installDefaults(repo, new Set()).sort()).toEqual(DEFAULT_FORMS);
 		expect(readFileSync(path.join(repo, '.github/labels.yml'), 'utf8')).toBe('mine');
+		expect(readFileSync(path.join(repo, '.github/pull_request_template.md'), 'utf8')).toBe('mine too');
 	});
 
 	test('install refuses to overwrite an existing form and writes nothing', () => {
@@ -310,6 +318,7 @@ process.stdout.write(${JSON.stringify(JSON.stringify({ data: { repository: { iss
 		);
 		expect(JSON.parse(readFileSync(log, 'utf8')).variables).toEqual({ owner: 'o', name: '2048' });
 		expect(output).toContain('[wrote] .github/ISSUE_TEMPLATE/bug.yml');
+		expect(output).toContain('[wrote] .github/pull_request_template.md');
 		expect(output).toContain(summary);
 		expect([...readSchema(repo).forms].map(([name, form]) => [name, form.type])).toEqual([
 			['bug', bug],

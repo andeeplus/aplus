@@ -6,8 +6,8 @@
  *        node --experimental-strip-types create-issues.mts --init [--repo owner/name]
  *
  * Run it from inside the target repository. Format: ../references/issues.md. Schema: `.github/ISSUE_TEMPLATE/*.yml`
- * and, when present, `.github/labels.yml`. `--init` copies the default forms and labels from ../assets/ into
- * `.github/`. `--apply` and `--init` need an authenticated `gh` CLI.
+ * and, when present, `.github/labels.yml`. `--init` copies the default forms, labels and pull request template from
+ * ../assets/ into `.github/`. `--apply` and `--init` need an authenticated `gh` CLI.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
@@ -61,6 +61,8 @@ const FENCED_BLOCK = /^(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1[ \t]*$/gm;
 const USAGE = `Usage: create-issues.mts <file.md | folder> [more files] [--repo owner/name] [--apply]
        create-issues.mts --init [--repo owner/name]`;
 const DEFAULTS = path.resolve(import.meta.dirname, '../assets');
+/** Defaults that are kept when the repository already has one. */
+const SHARED_DEFAULTS = ['.github/labels.yml', '.github/pull_request_template.md'];
 
 function unquote(value: string): string {
 	return value.trim().replace(/^(['"])(.*)\1$/, '$2');
@@ -140,7 +142,7 @@ export function readSchema(root: string): Schema {
 	);
 	if (forms.size === 0) {
 		throw new Error(
-			`No issue forms in ${formsDir}. Drafts are validated against them. Default forms and labels are in ${DEFAULTS}; install them with --init.`,
+			`No issue forms in ${formsDir}. Drafts are validated against them. Default forms, labels and pull request template are in ${DEFAULTS}; install them with --init.`,
 		);
 	}
 	const labelsFile = path.join(root, '.github/labels.yml');
@@ -151,11 +153,12 @@ export function readSchema(root: string): Schema {
 }
 
 /**
- * Copies the default issue forms and `labels.yml` into `root`'s `.github/` and returns the paths written.
+ * Copies the default issue forms, `labels.yml` and pull request template into `root`'s `.github/` and returns the
+ * paths written.
  *
  * @remarks
  * A form keeps its `type` only when `types` has it: GitHub defines issue types per organization, and a personal
- * repository has none. An existing `labels.yml` is kept.
+ * repository has none. An existing `labels.yml` or pull request template is kept.
  *
  * @throws When any of the forms exists. Nothing is written then.
  */
@@ -165,7 +168,8 @@ export function installDefaults(root: string, types: Set<string>): string[] {
 	);
 	const existing = forms.filter((file) => existsSync(path.join(root, file)));
 	if (existing.length > 0) throw new Error(`Not overwriting ${existing.join(', ')}. Nothing was written.`);
-	const files = existsSync(path.join(root, '.github/labels.yml')) ? forms : ['.github/labels.yml', ...forms];
+	const shared = SHARED_DEFAULTS.filter((file) => !existsSync(path.join(root, file)));
+	const files = [...shared, ...forms];
 	mkdirSync(path.join(root, '.github/ISSUE_TEMPLATE'), { recursive: true });
 	for (const file of files) {
 		const source = readFileSync(path.join(DEFAULTS, path.relative('.github', file)), 'utf8');
@@ -523,8 +527,8 @@ if (isMain) {
 		const types = issueTypes(repo());
 		const written = installDefaults(root, types);
 		for (const file of written) console.log(`[wrote] ${file}`);
+		for (const file of SHARED_DEFAULTS) if (!written.includes(file)) console.log(`[kept] ${file}`);
 		if (!written.includes('.github/labels.yml')) {
-			console.log('[kept] .github/labels.yml');
 			const { forms, labels } = readSchema(root);
 			const missing = [...new Set([...forms.values()].flatMap((form) => form.labels))].filter(
 				(label) => !labels?.has(label),
