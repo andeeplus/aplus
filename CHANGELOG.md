@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.8
+
+### Patch Changes
+
+- 4ad1c26: deliver: build each issue of a program in a fresh subagent and keep only its output block, so long audit runs stay small
+
 ## 0.1.7
 
 ### Patch Changes
