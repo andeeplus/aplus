@@ -42,7 +42,7 @@ APLUS_SECOND_OPINION_REVIEWERS=opencode:opencode-go/kimi-k3,opencode:github-copi
 node --experimental-strip-types <this skill's folder>/scripts/run-review.mts --base <ref> --notes <file> --self <your model id> [--round 1|2|3]
 ```
 
-The coding agent runs this itself; the user never has to. Run it from inside the repository, in the background: a review takes minutes. `<ref>` is the base the change targets, such as `origin/<integration branch>`, or, for a stacked PR, the branch below it. `--self` is the model you run on. The script sends the brief, the round, your notes, the diff from the merge base to the working tree, and the paths of untracked files, then prints the reviewer's findings.
+The coding agent runs this itself; the user never has to. Run it from inside the repository, in the background: a review takes minutes. `<ref>` is the base the change targets, such as `origin/<integration branch>`, or, for a stacked PR, the branch below it. `--self` is the model you run on. The script sends the brief, the round, your notes, the path of a file holding the diff from the merge base to the working tree without lockfiles, and the paths of untracked files, then prints the reviewer's findings and deletes that file.
 
 - Exit code 2 means no listed reviewer is from another family. The script has written the prompt to a file and printed its path. Start a fresh, read-only subagent, not one that inherits your conversation, on a model you pick this way, and tell it to follow the prompt in that file; its reply is the review:
     - not the one you are running on, and from a different family when your harness offers one;
@@ -53,7 +53,6 @@ The coding agent runs this itself; the user never has to. Run it from inside the
 
 - These rules are only for a model you pick. A listed reviewer runs as set, whatever its tier.
 - Invoke this skill by name rather than only reading this file. Its `allowed-tools` pre-approves the command above, so a harness that blocks one agent from starting another lets it run. A harness that ignores `allowed-tools` needs the same rule in its own settings.
-- A change too large for one prompt fails with a message. Review it in parts with a nearer `--base`.
 
 ## Flow
 
@@ -66,4 +65,4 @@ There are at most three rounds per change, and the third is optional. The script
 5. **Round 2, only if round 1 led to a code change.** Write new notes that list each round 1 finding with what you did: fixed at `file:line`, or rejected and why. Run `--round 2`. The reviewer checks only those fixes and what they touch. It does not look for new issues.
 6. **Round 3, optional, only if round 2 led to a code change.** Run it as round 2, with notes on each round 2 finding, and `--round 3`.
 7. **Stop.** Do not ask again because you disagree with a result or because the last round raised something. Verify what it reports, fix what is `easy` and holds, and list the rest as open findings for the user to decide.
-8. **Clean up.** Delete your notes and every prompt file the script wrote: each prompt file holds the full diff, and nothing else removes it.
+8. **Clean up.** Delete your notes and, after an exit code 2, the folder holding the prompt and the diff: nothing else removes it.

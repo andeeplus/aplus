@@ -15,20 +15,13 @@
  */
 import { execFileSync, spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 const USAGE =
 	'Usage: node --experimental-strip-types run-review.mts --base <ref> --notes <file> (--self <model> | --harness <h> --model <m>) [--round 1|2|3]';
-
-/**
- * @remarks
- * Every harness takes the prompt as one argument, and Linux caps a single argument at 128 KiB. Review a larger
- * change in parts, with a nearer `--base`.
- */
-const MAX_PROMPT_BYTES = 120_000;
 
 /**
  * Matches a fast variant such as `grok-4.7-high-fast`, but not Cursor's `[fast=false]` override. A model the agent
@@ -48,12 +41,13 @@ type Reviewer = { harness: string; model: string; effort?: string };
  * The headless, read-only command for each harness.
  *
  * @remarks
- * The prompt goes last. Claude's `--allowedTools` takes several values, so the prompt must follow `-p`, not it.
+ * The prompt goes last. Claude's `--allowedTools` and `--add-dir` take several values, so the prompt must follow `-p`,
+ * not them. `--add-dir` lets Claude read the diff file, which sits outside the repository.
  * Claude's fast mode is a setting rather than a model id, so it is switched off for the run. Cursor refuses to run
  * headless in an untrusted folder; `--trust` answers that prompt only, and `--mode ask` still keeps it read-only.
  */
-const HARNESSES: Partial<Record<string, (prompt: string, model: string, effort?: string) => string[]>> = {
-	claude: (prompt, model, effort) => [
+const HARNESSES: Partial<Record<string, (prompt: string, model: string, effort?: string, dir?: string) => string[]>> = {
+	claude: (prompt, model, effort, dir = '') => [
 		'claude',
 		'--model',
 		model,
@@ -63,6 +57,8 @@ const HARNESSES: Partial<Record<string, (prompt: string, model: string, effort?:
 		'dontAsk',
 		'--allowedTools',
 		'Read,Grep,Glob',
+		'--add-dir',
+		dir,
 		...(effort ? ['--effort', effort] : []),
 		'-p',
 		prompt,
@@ -167,24 +163,37 @@ function reviewer(harness: string, spec: string): Reviewer {
 	return { harness, model, effort };
 }
 
+/** Lockfiles of any language: a package manager writes them, so there is nothing to review. */
+const LOCKFILES = [
+	'*.lock',
+	'*.lockb',
+	'*.lockfile',
+	'*-lock.json',
+	'*-lock.yaml',
+	'*-lock.yml',
+	'packages.lock.json',
+	'npm-shrinkwrap.json',
+	'go.sum',
+];
+
 /**
  * @remarks
- * The diff sits in the prompt so the reviewer needs no shell, which not every harness allows in read-only mode.
- * Untracked files are listed by path for the reviewer to read. The notes and the diff are fenced with a random tag,
- * so a `</diff>` inside the change cannot end its section early.
+ * The diff is a file the reviewer reads, so the prompt stays small and the reviewer needs no shell, which not every
+ * harness allows in read-only mode. Untracked files are listed by path for the reviewer to read. The notes are fenced
+ * with a random tag, so a `</notes>` inside them cannot end the section early.
  */
 function buildPrompt(review: {
 	brief: string;
 	round: string;
 	notes: string;
 	base: string;
-	diff: string;
+	diffFile: string;
 	untracked: string[];
 }): string {
-	const { brief, round, notes, base, diff, untracked } = review;
+	const { brief, round, notes, base, diffFile, untracked } = review;
 	const tag = randomUUID().slice(0, 8);
 	const files = untracked.length > 0 ? untracked.map((file) => `- ${file}`).join('\n') : 'None.';
-	return `${brief}\n## This review\n\nRound ${round} of at most 3.\n\nThe author's notes:\n\n<notes-${tag}>\n${notes.trim()}\n</notes-${tag}>\n\nEverything since the merge base with \`${base}\`, committed or not:\n\n<diff-${tag}>\n${diff}</diff-${tag}>\n\nNew untracked files, not in the diff; read them:\n\n${files}\n`;
+	return `${brief}\n## This review\n\nRound ${round} of at most 3.\n\nThe author's notes:\n\n<notes-${tag}>\n${notes.trim()}\n</notes-${tag}>\n\nEverything since the merge base with \`${base}\`, committed or not, is the diff in ${diffFile}. Read it first.\n\nNew untracked files, not in the diff; read them:\n\n${files}\n`;
 }
 
 /**
@@ -247,27 +256,35 @@ if (isMain) {
 		);
 	}
 
-	const diff = git('-C', root, 'diff', git('-C', root, 'merge-base', values.base, 'HEAD').trim());
-	const untracked = git('-C', root, 'ls-files', '--others', '--exclude-standard').split('\n').filter(Boolean);
+	const skipLocks = LOCKFILES.map((name) => `:(exclude,glob)**/${name}`);
+	const diff = git(
+		'-C',
+		root,
+		'diff',
+		git('-C', root, 'merge-base', values.base, 'HEAD').trim(),
+		'--',
+		'.',
+		...skipLocks,
+	);
+	const untracked = git('-C', root, 'ls-files', '--others', '--exclude-standard', '--', '.', ...skipLocks)
+		.split('\n')
+		.filter(Boolean);
 	if (!diff && untracked.length === 0) {
 		console.log(`Nothing to review: no changes since the merge base with ${values.base}.`);
 		process.exit(0);
 	}
 
 	const brief = readFileSync(path.join(import.meta.dirname, '../references/brief.md'), 'utf8');
-	const prompt = buildPrompt({ brief, round: values.round, notes, base: values.base, diff, untracked });
-	const bytes = Buffer.byteLength(prompt);
-	if (bytes > MAX_PROMPT_BYTES) {
-		throw new Error(
-			`The change is ${bytes} bytes, over the ${MAX_PROMPT_BYTES}-byte prompt limit. Use a nearer --base.`,
-		);
-	}
+	const dir = mkdtempSync(path.join(os.tmpdir(), 'second-opinion-'));
+	const diffFile = path.join(dir, 'diff.patch');
+	writeFileSync(diffFile, diff);
+	const prompt = buildPrompt({ brief, round: values.round, notes, base: values.base, diffFile, untracked });
 
 	if (!picked) {
-		const file = path.join(mkdtempSync(path.join(os.tmpdir(), 'second-opinion-')), 'prompt.md');
+		const file = path.join(dir, 'prompt.md');
 		writeFileSync(file, prompt);
 		console.error(
-			`No reviewer from a family other than ${family(values.self ?? '')} is set in APLUS_SECOND_OPINION_REVIEWERS (${path.join(root, '.env')}). The review prompt is in ${file}: give it to a fresh, read-only subagent on another model, or run again with --harness and --model.`,
+			`No reviewer from a family other than ${family(values.self ?? '')} is set in APLUS_SECOND_OPINION_REVIEWERS (${path.join(root, '.env')}). The review prompt is in ${file}: give it to a fresh, read-only subagent on another model, or run again with --harness and --model. The diff is beside it.`,
 		);
 		process.exit(2);
 	}
@@ -278,8 +295,9 @@ if (isMain) {
 	if (apiKey && !apiKeyVar) console.error(`${harness} takes no API key here; log in with its own CLI.`);
 	const env = apiKey && apiKeyVar ? { ...process.env, [apiKeyVar]: apiKey } : process.env;
 
-	const [command, ...args] = HARNESSES[harness]!(prompt, model, effort);
+	const [command, ...args] = HARNESSES[harness]!(prompt, model, effort, dir);
 	const result = spawnSync(command, args, { cwd: root, env, stdio: ['ignore', 'inherit', 'inherit'] });
+	rmSync(dir, { recursive: true, force: true });
 	if (result.error) {
 		console.error(`Could not run ${command}. Install it and log in.`);
 		throw result.error;

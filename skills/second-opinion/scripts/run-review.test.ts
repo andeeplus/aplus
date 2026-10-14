@@ -45,7 +45,7 @@ beforeAll(() => {
 	for (const command of ['claude', 'cursor-agent', 'codex', 'opencode']) {
 		writeFileSync(
 			path.join(bin, command),
-			`#!/usr/bin/env node\nrequire('node:fs').writeFileSync(${JSON.stringify(log)}, JSON.stringify({ argv: process.argv.slice(2), key: process.env.CURSOR_API_KEY }));\n`,
+			`#!/usr/bin/env node\nrequire('node:fs').writeFileSync(${JSON.stringify(log)}, JSON.stringify({ argv: process.argv.slice(2), key: process.env.CURSOR_API_KEY, diff: (m => m ? require('node:fs').readFileSync(m[1], 'utf8') : undefined)(/(\\S+diff\\.patch)/.exec(process.argv.at(-1))) }));\n`,
 		);
 		chmodSync(path.join(bin, command), 0o755);
 	}
@@ -61,6 +61,7 @@ beforeAll(() => {
 	git('commit', '-q', '-am', 'committed change');
 	writeFileSync(path.join(repo, 'a.ts'), 'export const a = 3;\n');
 	writeFileSync(path.join(repo, 'b.ts'), 'export const b = 1;\n');
+	writeFileSync(path.join(repo, 'pnpm-lock.yaml'), 'lockfileVersion: 9\n');
 });
 
 afterAll(() => rmSync(root, { recursive: true, force: true }));
@@ -70,7 +71,7 @@ beforeEach(() => {
 	rmSync(path.join(repo, '.env'), { force: true });
 });
 
-function harnessCall(): { argv: string[]; key?: string } {
+function harnessCall(): { argv: string[]; key?: string; diff?: string } {
 	return JSON.parse(readFileSync(log, 'utf8'));
 }
 
@@ -153,15 +154,18 @@ test('sends the brief, the round, the notes, every change since the merge base a
 
 	expect(result.stderr).toBe('');
 	expect(result.status).toBe(0);
-	const { argv, key } = harnessCall();
+	const { argv, key, diff } = harnessCall();
 	expect(key).toBe('review-key');
 	expect(argv).toEqual(expect.arrayContaining(['-p', '--trust', '--mode', 'ask', '--model', 'grok-4']));
 	const prompt = argv[argv.length - 1];
 	expect(prompt).toContain('# Review from a second model');
 	expect(prompt).toContain('Round 1 of at most 3.');
 	expect(prompt).toContain('fixed a missing null check');
-	expect(prompt).toContain('-export const a = 1;\n+export const a = 3;');
+	expect(prompt).not.toContain('export const a');
+	expect(diff).toContain('-export const a = 1;\n+export const a = 3;');
+	expect(diff).not.toContain('pnpm-lock.yaml');
 	expect(prompt).toContain('- b.ts');
+	expect(prompt).not.toContain('pnpm-lock.yaml');
 });
 
 test('reviews on the harness and model passed as flags, ignoring the list', () => {
