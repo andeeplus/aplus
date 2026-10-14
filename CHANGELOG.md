@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.9
+
+### Patch Changes
+
+- 97bf7a0: audit: find the audit with a script and ask the user where it is, or whether to work from the tracker's issues, when it is missing
+- 97bf7a0: github, atlassian: read the board and statuses from the project's instructions first, and offer to record them there once asked
+
 ## 0.1.8
 
 ### Patch Changes
