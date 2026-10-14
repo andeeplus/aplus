@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7
+
+### Patch Changes
+
+- a330592: final-review: leave lockfiles out of every reviewer's diff, and give the second opinion its diff as a file, not in the prompt
+
 ## 0.1.6
 
 ### Patch Changes
