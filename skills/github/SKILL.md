@@ -35,7 +35,7 @@ A GitHub Project linked to the repository is a board. With none, skip it. With o
 
 1. Unless the project's instructions give the statuses, list the status options ([cli.md: Board](references/cli.md#board)) and ask once which option is in progress, which is in review, and which is done. Skip a step the user leaves unset. That answer approves the later moves.
 2. Add the issue if it is not on the board, before the first status move.
-3. Set in progress when work on it starts, in review when its PR opens, and done when that PR merges, not when work on the issue finishes.
+3. Read the current status ([cli.md: Board](references/cli.md#board)). Set in progress before implementation starts, and assign the logged-in user ([cli.md: Issues](references/cli.md#issues)), so other agents see the issue is taken. Set in review when its PR opens, and done when that PR merges, not when work on the issue finishes.
 
 ## Script
 

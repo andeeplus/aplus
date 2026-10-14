@@ -11,8 +11,8 @@ Automatic from spec to PR, every gate included. It waits for the user only to re
 
 - **Ask before creating issues.** Show the drafts, delete the ones the user rejects, and create the rest.
 - **Ask before a dangerous action:** one that is hard to undo or reaches past the change, such as merging, force-pushing, deleting a branch or data, a migration that could break a running system or lose data, a deploy, or changing repository or CI settings.
-- **Ask for nothing else.** Asking to deliver approves each push, PR and PR body edit, and answers the waits in triage, final-review and create-pr. Resolve a target, merge method or branch name from the project and the host skill. When a board exists, ask that skill's one-time question, then move the issue as it says. Do not set done: that waits for merge.
-- **Park, don't stop.** When an issue cannot go on (a triage verdict other than `real bug` or `request`, work that already exists, an open decision, a question from debug that blocks the fix, or a `not ready` verdict), record why, write a [handoff](../handoff/SKILL.md) note if it has a branch, skip the issues it blocks, and continue.
+- **Ask for nothing else.** Asking to deliver approves each push, PR and PR body edit, and answers the waits in triage, final-review and create-pr. Resolve a target, merge method or branch name from the project and the host skill. When a board exists, ask that skill's one-time question, then move the issue as it says. Set in progress and assign the logged-in user before creating the branch or changing code. Do not set done: that waits for merge.
+- **Park, don't stop.** When an issue cannot go on (a triage verdict other than `real bug` or `request`, work that already exists, an issue another agent already has in progress or in review, an open decision, a question from debug that blocks the fix, or a `not ready` verdict), record why, write a [handoff](../handoff/SKILL.md) note if it has a branch, skip the issues it blocks, and continue.
 - **Build to the bar final-review applies** ([code-quality](../code-quality/SKILL.md)): the durable fix, inside the issue's scope, following the code around it. Work outside the scope becomes a draft.
 - **Keep the drafts in one scratch folder** outside the tree, unless the caller names one.
 
@@ -20,16 +20,17 @@ Automatic from spec to PR, every gate included. It waits for the user only to re
 
 1. **Start.** A ticket goes to [triage](../triage/SKILL.md): a `real bug` goes to step 3, a `request` to define. An idea goes to [define](../define/SKILL.md). An issue with acceptance criteria, or a program of them, goes to step 3.
 2. **Review.** Ask define for the drafts with the spec: the spec's issue when the project needs one, every issue of a program, and the ticket edit for a ticket. Define's review is the run's one review; create the issues and publish the edit the user approves.
-3. **Run each issue** through steps 4 to 8, in "blocked by" order, without asking between them unless the user asked for pauses. In a program, hand each issue's pass to a fresh subagent briefed with the issue, its draft and the project instructions, and keep only its output block here, so context stays small. A decision issue, and the work it blocks, waits for a maintainer. An issue too big to review as one PR, such as one sized `outcome`, ships as a stack: its pass through steps 4 to 8 runs once per reviewable slice, each branch on the slice below ([stacks](../create-pr/references/stacks.md)).
-4. **Branch** as [create-pr](../create-pr/SKILL.md) says. Set in progress as the host skill's board says.
-5. **Build.**
+3. **Run each issue** through steps 4 to 9, in "blocked by" order, without asking between them unless the user asked for pauses. In a program, run the claim, then hand the rest of that issue's pass to a fresh subagent briefed with the issue, its draft, the project instructions and that the claim is done, and keep only its output block here, so context stays small. A decision issue, and the work it blocks, waits for a maintainer. An issue too big to review as one PR, such as one sized `outcome`, ships as a stack: claim it once, then run the rest of the pass once per reviewable slice, each branch on the slice below ([stacks](../create-pr/references/stacks.md)).
+4. **Claim.** Read the issue's status as the host skill's board says. Park it when it is already in progress or in review, unless you are resuming it from its branch or a handoff note. Otherwise set it in progress and assign the logged-in user, as that board says, before creating the branch or changing code.
+5. **Branch** as [create-pr](../create-pr/SKILL.md) says.
+6. **Build.**
     - A bug: its [Gherkin scenario](../gherkin/SKILL.md#a-bugs-scenario), in the PR body when the ticket has none, then [debug](../debug/SKILL.md).
     - A task: for each acceptance scenario, a test that fails first ([testing](../testing/SKILL.md)), then the code that makes it pass.
     - A refactor: the existing tests stay green; add one first where none covers the behaviour.
-6. **Gate.** Run [final-review](../final-review/SKILL.md). Fix what fits the issue's scope, red checks included. Draft the rest with [create-issue](../create-issue/SKILL.md): a decision when the fix is unclear or a program of its own. Keep nits for the PR body. If you changed the branch, run final-review once more and draft any new out-of-scope finding. A drafted finding counts as logged, since the user reviews drafts at the end; when the verdict is still `not ready`, park the issue and include its drafts in the report.
-7. **Commit** with [commit-expert](../commit-expert/SKILL.md).
-8. **Open the PR** with create-pr, naming each deferred finding by title.
-9. **Report** with the output below and every deferred draft. When the user answers, create the approved ones. When the issue opened a PR, link each from it and remove rejected ones from the PR body.
+7. **Gate.** Run [final-review](../final-review/SKILL.md). Fix what fits the issue's scope, red checks included. Draft the rest with [create-issue](../create-issue/SKILL.md): a decision when the fix is unclear or a program of its own. Keep nits for the PR body. If you changed the branch, run final-review once more and draft any new out-of-scope finding. A drafted finding counts as logged, since the user reviews drafts at the end; when the verdict is still `not ready`, park the issue and include its drafts in the report.
+8. **Commit** with [commit-expert](../commit-expert/SKILL.md).
+9. **Open the PR** with create-pr, naming each deferred finding by title.
+10. **Report** with the output below and every deferred draft. When the user answers, create the approved ones. When the issue opened a PR, link each from it and remove rejected ones from the PR body.
 
 ## Output
 
