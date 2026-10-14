@@ -100,8 +100,8 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --fi
 Run the program's open change issues with [deliver](../deliver/SKILL.md). Within an audit:
 
 - Deliver's draft folder is the program's `issues/`, so its drafts share the `manifest.json`.
-- Pass each issue's subagent its draft path and the audit entries its `audit` list names. Between issues, this context holds the `manifest.json` and each issue's output block.
-- Before building an issue, match it to its draft in `issues/` (`manifest.json` maps each draft key to its issue) and read the audit entries that draft's `audit` list names. They are the steps, and may change while building; the issue's acceptance is what must hold.
+- Claim the issue, as deliver does, before its subagent starts. Pass the subagent its draft path and the audit entries its `audit` list names, with the claim already done. Between issues, this context holds the `manifest.json` and each issue's output block.
+- After the claim, and before the branch, match the issue to its draft in `issues/` (`manifest.json` maps each draft key to its issue) and read the audit entries that draft's `audit` list names. They are the steps, and may change while building; the issue's acceptance is what must hold.
 - A finding that is a program of its own stays a decision draft; propose an audit for it at hand off.
 - Keep audit keys and audit dir paths out of branch names, titles and bodies.
 

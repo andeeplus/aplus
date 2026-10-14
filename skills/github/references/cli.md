@@ -20,6 +20,7 @@ gh issue view <n> --comments                                  # the whole thread
 gh issue view <n> --json blockedBy,parent                     # what one issue waits on
 gh issue view <tracking> --json subIssues                     # a program's changes and their state
 gh issue edit <n> --type <name>                               # set the issue type
+gh issue edit <n> --add-assignee @me                          # the logged-in user, when set in progress
 gh issue edit <n> --add-label <label> --milestone <title>
 gh issue edit <n> --parent <p> --add-blocked-by <m>
 gh issue comment <n> --body-file <scratch>/comment.md
@@ -36,11 +37,12 @@ The [board](../SKILL.md#board) is optional. `<owner>` is the repository owner: `
 gh repo view --json projectsV2 --jq '.projectsV2.Nodes[] | {number, title}'
 gh project field-list <number> --owner <owner> --format json --jq '.fields[] | select(.options) | {name, options: [.options[].name]}'
 gh issue view <n> --json url --jq .url
+gh project item-list <number> --owner <owner> --limit 1000 --format json --jq '.items[] | select(.content.url == "<issue-url>") | .status'
 gh project item-add <number> --owner <owner> --url <issue-url>
 gh project item-edit <number> --owner <owner> --url <issue-url> --field "<field>" --value "<option>"
 ```
 
-One single-select field is the column. When several fields have options, ask which field in the same question as the options.
+One single-select field is the column, and `item-list` prints it under that name in camel case (`status` for Status). When several fields have options, ask which field in the same question as the options.
 
 ## Pull requests
 

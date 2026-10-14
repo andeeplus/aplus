@@ -33,7 +33,7 @@ A Jira board is a view of issues in a project. Creating an issue does not need o
 
 1. Unless the project's instructions give the board and statuses, list them ([jira.md: Board](references/jira.md#board)) and ask once which status is in progress, which is in review, and which is done. Skip a step the user leaves unset. That answer approves the later transitions.
 2. Confirm the issue shows on the board after creating it: a Scrum board puts it in the backlog, and a board's filter can leave it out.
-3. Set in progress when work on it starts, in review when its PR opens, and done when that PR merges, not when work on the issue finishes.
+3. Read the current status ([jira.md: Board](references/jira.md#board)). Set in progress before implementation starts, and assign the logged-in user ([jira.md: Other commands](references/jira.md#other-commands)), so other agents see the issue is taken. Set in review when its PR opens, and done when that PR merges, not when work on the issue finishes.
 
 ## Script
 

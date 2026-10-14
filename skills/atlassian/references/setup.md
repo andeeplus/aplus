@@ -13,4 +13,4 @@ Create tokens at <https://id.atlassian.com/manage-profile/security/api-tokens>. 
 
 A token's scopes are fixed when it is created: to add one, create a new token and log in again. Each scope above ends in `:bitbucket`. Check a login with `auth test`, and a Bitbucket token's scopes with `auth scopes`. For git over HTTPS, the username is `x-bitbucket-api-token-auth`.
 
-**Permissions.** Bitbucket repository: Read to view, comment and approve; Write to push and merge. Jira project: Browse, Create, Link issues, Add comments, Transition. Confluence space: View, Add pages, Add comments.
+**Permissions.** Bitbucket repository: Read to view, comment and approve; Write to push and merge. Jira project: Browse, Create, Link issues, Add comments, Assign issues, Transition. Confluence space: View, Add pages, Add comments.
