@@ -1,0 +1,9 @@
+# Changes to skills, workflows and manifests need the owner's review
+/skills/ @andeeplus
+/.github/ @andeeplus
+/.claude-plugin/ @andeeplus
+/.codex-plugin/ @andeeplus
+/.cursor-plugin/ @andeeplus
+/.agents/ @andeeplus
+/.opencode/ @andeeplus
+/package.json @andeeplus
