@@ -4,10 +4,12 @@
  * Usage: node --experimental-strip-types new-audit.mts <scope-slug> --author <slug> --model <name>
  *        [--posture strict|balanced] [--review]
  *        node --experimental-strip-types new-audit.mts --sync
+ *        node --experimental-strip-types new-audit.mts --find [scope-slug]
  *
  * Without `--review` it starts the audit: `README.md`, `bugs.md` and, for `strict`, `program.md`, `notes.md`
  * and `issues/`. With `--review` it adds `review-<author>.md` to the audit already started for that scope.
  * `--sync` copies the working copy to every mirror; with no mirror it does nothing. Creating files syncs too.
+ * `--find` prints the audits in the working copy, or the one for a scope, and exits 1 when there are none.
  *
  * The audit dirs come from `APLUS_AUDIT_DIRS` in the environment or the repository's root `.env`, a list separated by
  * commas. The first is the working copy and defaults to `.audit`;
@@ -66,6 +68,20 @@ export function auditDirs(value: string | undefined, root: string, project: stri
 	);
 }
 
+/** The audits in `dir` as `<scope>/<date>` paths, for one scope or all; empty when the dir or scope is missing. */
+export function findAudits(dir: string, scope?: string): string[] {
+	if (!existsSync(dir)) return [];
+	const scopes = scope ? [scope] : readdirSync(dir);
+	return scopes.flatMap((name) => {
+		const scopeDir = path.join(dir, name);
+		if (!existsSync(scopeDir)) return [];
+		return readdirSync(scopeDir)
+			.filter((entry) => DATE_FOLDER.test(entry))
+			.sort()
+			.map((date) => path.join(scopeDir, date));
+	});
+}
+
 /** Copies the working copy over each mirror. It never deletes, so a mirror keeps what the working copy loses. */
 export function sync(dirs: string[]): void {
 	const [primary, ...mirrors] = dirs;
@@ -94,14 +110,16 @@ if (isMain) {
 				posture: { type: 'string', default: 'strict' },
 				review: { type: 'boolean', default: false },
 				sync: { type: 'boolean', default: false },
+				find: { type: 'boolean', default: false },
 			},
 			allowPositionals: true,
 		});
 		const [scope] = positionals;
 		const usage =
-			'Usage: new-audit.mts <scope-slug> --author <slug> --model <name> [--posture strict|balanced] [--review]\n       new-audit.mts --sync';
+			'Usage: new-audit.mts <scope-slug> --author <slug> --model <name> [--posture strict|balanced] [--review]\n       new-audit.mts --sync\n       new-audit.mts --find [scope-slug]';
 		if (
 			!values.sync &&
+			!values.find &&
 			(!scope || !values.author || !values.model || !['strict', 'balanced'].includes(values.posture))
 		) {
 			throw new Error(usage);
@@ -114,6 +132,12 @@ if (isMain) {
 			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
 		}
 		const dirs = auditDirs(process.env.APLUS_AUDIT_DIRS, root, projectName(root));
+		if (values.find) {
+			const found = findAudits(dirs[0], scope);
+			if (!found.length) throw new Error(`No audit in ${dirs[0]}`);
+			console.log(found.join('\n'));
+			process.exit(0);
+		}
 		for (const dir of dirs) {
 			const rel = path.relative(root, dir);
 			if (rel.startsWith('..') || path.isAbsolute(rel)) continue;

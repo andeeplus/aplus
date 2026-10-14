@@ -14,6 +14,7 @@ Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). T
 - **Correct over convenient.** Choose the long-term right fix. No workarounds, stubs, or docs that paper over a bad contract.
 - **Push for truth.** Types, tests, runtime behaviour and docs must agree.
 - **Sync after every change.** Each time you write, edit or create anything in the audit dir, including issue drafts and `manifest.json`, run `new-audit.mts --sync`. With no mirror it does nothing, so always run it.
+- **Ask when the audit is missing.** An audit lives only in the audit dirs. Before reading one, run `new-audit.mts --find [scope-slug]`. When it exits 1, such as on a fresh clone or another machine, ask the user where the audit is, or whether to work from the tracker's issues alone. For the issues alone, take the tracker and project from the project's instructions, asking when they do not name them, then read the tracking issue and its children with the platform skill ([github](../github/SKILL.md) or [atlassian](../atlassian/SKILL.md)) and run Execute with each issue's acceptance as the steps.
 
 ## Posture
 
@@ -69,11 +70,13 @@ Create the files with [scripts/new-audit.mts](scripts/new-audit.mts), then fill 
 node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <scope-slug> --author <author-slug> --model <model> [--posture strict|balanced]
 node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <scope-slug> --author <author-slug> --model <model> --review
 node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --sync
+node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --find [scope-slug]
 ```
 
 - **First run:** the command without `--review` writes the files for the posture.
 - **Another author's review:** `--review` adds `review-{author-slug}.md`. Do not rewrite the first run's files.
 - **Sync:** `--sync` copies the working copy to every mirror. The first two commands sync on their own.
+- **Find:** `--find` prints the audits in the working copy, or the one for a scope, and exits 1 when there are none.
 - **Cross-audit:** the first author writes the full set. Each further author writes only `review-{author-slug}.md` from the same template, without reading the first author's files until their own findings are written. Once every author's file exists, write `synthesis.md` before drafting issues.
 
 ## Issues (on request)

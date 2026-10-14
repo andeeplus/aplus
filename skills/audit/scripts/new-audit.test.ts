@@ -1,9 +1,9 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from 'vitest';
-import { auditDirs, fill, pickDate, projectName } from './new-audit.mts';
+import { auditDirs, fill, findAudits, pickDate, projectName } from './new-audit.mts';
 
 const SCRIPT = path.join(import.meta.dirname, 'new-audit.mts');
 
@@ -101,5 +101,20 @@ test('starts an audit, adds a review, and stops when .audit/ is not ignored', ()
 		expect(existsSync(path.join(repo, '.audit/docs', date, 'program.md'))).toBe(false);
 	} finally {
 		rmSync(repo, { recursive: true, force: true });
+	}
+});
+
+test('findAudits lists the date folders of a scope or of every scope, and nothing for a missing dir', () => {
+	const dir = mkdtempSync(path.join(os.tmpdir(), 'find-audit-'));
+	try {
+		mkdirSync(path.join(dir, 'api', '2026-10-01'), { recursive: true });
+		mkdirSync(path.join(dir, 'api', 'issues'));
+		mkdirSync(path.join(dir, 'ui', '2026-09-30'), { recursive: true });
+		expect(findAudits(dir, 'api')).toEqual([path.join(dir, 'api', '2026-10-01')]);
+		expect(findAudits(dir)).toHaveLength(2);
+		expect(findAudits(dir, 'nope')).toEqual([]);
+		expect(findAudits(path.join(dir, 'missing'))).toEqual([]);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
 	}
 });

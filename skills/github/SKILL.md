@@ -9,10 +9,11 @@ Every agent does GitHub work the same way: formats come from the repository's `.
 
 ## Rules
 
-- **Read repository policy and settings.** Resolve the integration branch, merge method, labels, milestones and issue-script alias from contribution guidance, repository settings and `.github/`. When no integration branch is specified, use the default branch: `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`.
+- **Read repository policy and settings.** Start with the project's instructions, which may name the board and its statuses. Resolve the integration branch, merge method, labels, milestones and issue-script alias from contribution guidance, repository settings and `.github/`. When no integration branch is specified, use the default branch: `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`.
 
 - **Ask before you publish,** unless the user asked for that exact action, or the [board](#board) mapping already approves the move. Pushing, creating or editing issues and PRs, commenting and merging all publish.
 - **A board is optional.** Follow [Board](#board).
+- **Offer to record the board.** When you had to ask which board or statuses, offer to add them to the project's instructions so the next agent reads them. Edit that file only after the user agrees.
 - **Issues come from draft files.** Write a draft and run the issue script below. Never call `gh issue create` by hand: the script validates the draft against the issue forms and labels, then sets the type, labels, milestone, parent and "blocked by" links.
 - **The schema is in `.github/`.** The forms in `.github/ISSUE_TEMPLATE/` define each kind of issue and its sections. `.github/labels.yml`, when present, lists the allowed labels. `.github/pull_request_template.md` is the PR body. Read them; do not restate them.
 - **Commit forms before filing.** When the script reports no issue forms, or before opening a PR when `.github/pull_request_template.md` is missing, ask the user to choose: install the defaults with `--init`, then review and commit them; copy in forms or a template the project already keeps elsewhere, such as the account's `.github` repository; or stop. The script reads only the repository's own `.github/`, and committed forms give people who file on github.com the same sections as agents.
@@ -32,7 +33,7 @@ Every agent does GitHub work the same way: formats come from the repository's `.
 
 A GitHub Project linked to the repository is a board. With none, skip it. With one, use it; with several, ask which.
 
-1. List the status options ([cli.md: Board](references/cli.md#board)) and ask once which option is in progress, which is in review, and which is done. Skip a step the user leaves unset. That answer approves the later moves.
+1. Unless the project's instructions give the statuses, list the status options ([cli.md: Board](references/cli.md#board)) and ask once which option is in progress, which is in review, and which is done. Skip a step the user leaves unset. That answer approves the later moves.
 2. Add the issue if it is not on the board, before the first status move.
 3. Set in progress when work on it starts, in review when its PR opens, and done when that PR merges, not when work on the issue finishes.
 
