@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.11
+
+### Patch Changes
+
+- f5374a1: audit: run each issue in its own subagent from its audit excerpt, and ask once which harness and model gives the second opinion when none is configured
+- f5374a1: final-review: run the checks, then only the reviews the change needs among tests, code quality, docs and a second opinion, say why any is skipped, and reuse a verdict while the change is the same
+- f5374a1: deliver: remove a clean, pushed worktree after its pull request opens, keeping its branch and any worktree a harness manages
+
 ## 0.1.10
 
 ### Patch Changes
