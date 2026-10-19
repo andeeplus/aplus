@@ -5,6 +5,7 @@
  *        [--posture strict|balanced] [--review]
  *        node --experimental-strip-types new-audit.mts --sync
  *        node --experimental-strip-types new-audit.mts --find [scope-slug]
+ *        node --experimental-strip-types new-audit.mts --excerpt <date-folder> <key>...
  *
  * Without `--review` it starts the audit: `README.md`, `bugs.md` and, for `strict`, `program.md`, `notes.md`
  * and `issues/`. With `--review` it adds `review-<author>.md` to the audit already started for that scope.
@@ -82,6 +83,45 @@ export function findAudits(dir: string, scope?: string): string[] {
 	});
 }
 
+type Section = { key: string; level: number; text: string };
+
+/** Headings `## KEY:` and `### KEY:` through the next heading of the same or higher level. */
+function sections(markdown: string): Section[] {
+	const lines = markdown.split('\n');
+	const heads: { index: number; level: number; key: string }[] = [];
+	for (let index = 0; index < lines.length; index++) {
+		const match = /^(#{2,3}) ([^:\s]+):/.exec(lines[index]);
+		if (match) heads.push({ index, level: match[1].length, key: match[2] });
+	}
+	return heads.map((head, index) => {
+		let end = lines.length;
+		for (let next = index + 1; next < heads.length; next++) {
+			if (heads[next].level <= head.level) {
+				end = heads[next].index;
+				break;
+			}
+		}
+		return { key: head.key, level: head.level, text: lines.slice(head.index, end).join('\n') };
+	});
+}
+
+/** The sections of `bugs.md` and `program.md` named by `keys`, in the order the files list them. */
+export function excerpt(files: { name: string; text: string }[], keys: string[]): string {
+	const wanted = new Set(keys);
+	const found = new Set<string>();
+	const parts: string[] = [];
+	for (const file of files) {
+		for (const section of sections(file.text)) {
+			if (!wanted.has(section.key)) continue;
+			found.add(section.key);
+			parts.push(section.text.trimEnd());
+		}
+	}
+	const missing = keys.filter((key) => !found.has(key));
+	if (missing.length > 0) throw new Error(`No audit section for ${missing.join(', ')}`);
+	return `${parts.join('\n\n')}\n`;
+}
+
 /** Copies the working copy over each mirror. It never deletes, so a mirror keeps what the working copy loses. */
 export function sync(dirs: string[]): void {
 	const [primary, ...mirrors] = dirs;
@@ -111,20 +151,32 @@ if (isMain) {
 				review: { type: 'boolean', default: false },
 				sync: { type: 'boolean', default: false },
 				find: { type: 'boolean', default: false },
+				excerpt: { type: 'string' },
 			},
 			allowPositionals: true,
 		});
 		const [scope] = positionals;
 		const usage =
-			'Usage: new-audit.mts <scope-slug> --author <slug> --model <name> [--posture strict|balanced] [--review]\n       new-audit.mts --sync\n       new-audit.mts --find [scope-slug]';
+			'Usage: new-audit.mts <scope-slug> --author <slug> --model <name> [--posture strict|balanced] [--review]\n       new-audit.mts --sync\n       new-audit.mts --find [scope-slug]\n       new-audit.mts --excerpt <date-folder> <key>...';
+		const cwd = process.env.INIT_CWD ?? process.cwd();
+		if (values.excerpt) {
+			if (positionals.length === 0) throw new Error(usage);
+			const dir = path.resolve(cwd, values.excerpt);
+			const files = ['bugs.md', 'program.md']
+				.filter((name) => existsSync(path.join(dir, name)))
+				.map((name) => ({ name, text: readFileSync(path.join(dir, name), 'utf8') }));
+			if (files.length === 0) throw new Error(`No bugs.md or program.md in ${dir}`);
+			process.stdout.write(excerpt(files, positionals));
+			process.exit(0);
+		}
 		if (
 			!values.sync &&
 			!values.find &&
+			!values.excerpt &&
 			(!scope || !values.author || !values.model || !['strict', 'balanced'].includes(values.posture))
 		) {
 			throw new Error(usage);
 		}
-		const cwd = process.env.INIT_CWD ?? process.cwd();
 		const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd, encoding: 'utf8' }).trim();
 		try {
 			process.loadEnvFile(path.join(root, '.env'));

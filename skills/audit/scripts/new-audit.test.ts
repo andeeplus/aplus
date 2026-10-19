@@ -3,9 +3,40 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from 'vitest';
-import { auditDirs, fill, findAudits, pickDate, projectName } from './new-audit.mts';
+import { auditDirs, excerpt, fill, findAudits, pickDate, projectName } from './new-audit.mts';
 
 const SCRIPT = path.join(import.meta.dirname, 'new-audit.mts');
+
+test('the excerpt command prints one section and fails when the key is missing', () => {
+	const dir = mkdtempSync(path.join(os.tmpdir(), 'excerpt-'));
+	try {
+		writeFileSync(path.join(dir, 'bugs.md'), '## B1: x\n\ny\n');
+		const run = (...args: string[]) =>
+			spawnSync(process.execPath, ['--experimental-strip-types', SCRIPT, ...args], {
+				cwd: dir,
+				env: { ...process.env, INIT_CWD: dir },
+				encoding: 'utf8',
+			});
+		expect(run('--excerpt', dir, 'B1').stdout).toBe('## B1: x\n\ny\n');
+		expect(run('--excerpt', dir, 'B9').status).toBe(1);
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test('excerpt returns the named bug, theme or move, and a theme keeps its moves', () => {
+	const bugs = '# Bugs\n\n## B1: missing null check\n\nthe call throws\n\n## B2: other\n\nlater\n';
+	const program =
+		'# Program\n\n## T1: split the parser\n\nwhy\n\n### M1: extract the scanner\n\nmove it\n\n## T2: next\n\nother\n';
+	const files = [
+		{ name: 'bugs.md', text: bugs },
+		{ name: 'program.md', text: program },
+	];
+	expect(excerpt(files, ['B1'])).toBe('## B1: missing null check\n\nthe call throws\n');
+	expect(excerpt(files, ['T1'])).toBe('## T1: split the parser\n\nwhy\n\n### M1: extract the scanner\n\nmove it\n');
+	expect(excerpt(files, ['M1'])).toBe('### M1: extract the scanner\n\nmove it\n');
+	expect(() => excerpt(files, ['B9'])).toThrow(/No audit section for B9/);
+});
 
 test('pickDate keeps a program in the folder of its first day', () => {
 	expect(pickDate([], '2026-10-04', false)).toBe('2026-10-04');

@@ -71,12 +71,14 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <sco
 node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts <scope-slug> --author <author-slug> --model <model> --review
 node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --sync
 node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --find [scope-slug]
+node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --excerpt <date-folder> <key>...
 ```
 
 - **First run:** the command without `--review` writes the files for the posture.
 - **Another author's review:** `--review` adds `review-{author-slug}.md`. Do not rewrite the first run's files.
 - **Sync:** `--sync` copies the working copy to every mirror. The first two commands sync on their own.
 - **Find:** `--find` prints the audits in the working copy, or the one for a scope, and exits 1 when there are none.
+- **Excerpt:** `--excerpt` prints the bug, theme or move for each key. A theme includes its moves. It exits 1 when a key has no section.
 - **Cross-audit:** the first author writes the full set. Each further author writes only `review-{author-slug}.md` from the same template, without reading the first author's files until their own findings are written. Once every author's file exists, write `synthesis.md` before drafting issues.
 
 ## Issues (on request)
@@ -97,7 +99,13 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --fi
 
 ## Execute (on request)
 
-Run the program's open change issues with [deliver](../deliver/SKILL.md). Within an audit:
+Run the program's open change issues with [deliver](../deliver/SKILL.md), one fresh subagent per issue, one at a time in "blocked by" order, all in one worktree. A subagent cannot ask the user, so settle the reviewer first:
+
+1. **Reviewer.** When `APLUS_SECOND_OPINION_REVIEWERS`, in the environment or the repository's `.env`, lists no reviewer from a model family other than yours, ask once which harness (`claude`, `codex`, `cursor` or `opencode`) and exact model id run the [second opinion](../second-opinion/SKILL.md). Offer to save the answer to `.env` as `APLUS_SECOND_OPINION_REVIEWERS=<harness>:<model>` when `.env` is gitignored, and write it only if the user agrees.
+2. **Each issue.** Start a subagent with the absolute path of deliver's `SKILL.md`, the issue, its draft path, the `--excerpt` of the keys it was drafted from, the worktree path, and the reviewer from step 1. Tell it to skip deliver's worktree step and to return only deliver's output block. Keep the block and the drafts it names. The excerpt holds the steps and may change while building; the issue's acceptance is what must hold.
+3. **Worktree.** At hand off, run deliver's [remove script](../deliver/scripts/remove-worktree.mts) from the program worktree.
+
+Within an audit:
 
 - Deliver's draft folder is the program's `issues/`, so its drafts share the `manifest.json`.
 - Claim the issue, as deliver does, before its subagent starts. Pass the subagent its draft path and the audit entries its `audit` list names, with the claim already done. Between issues, this context holds the `manifest.json` and each issue's output block.
