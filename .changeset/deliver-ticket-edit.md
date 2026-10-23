@@ -4,4 +4,4 @@
 
 deliver: publish missing acceptance as an edit of the ticket, so the next run sees it
 
-define: show that edit in a scratch file
+define: show the whole edited body in a scratch file
