@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.12
+
+### Patch Changes
+
+- ce724eb: deliver: draft only issues that do not exist yet; a ticket on the tracker is that issue, so delivering it reviews the spec and builds it
+- f6cd413: deliver: publish missing acceptance as an edit of the ticket, so the next run sees it
+
+    define: show the whole edited body in a scratch file
+
+- 1fdcb9f: github: edit an issue body from a scratch file
+
+    atlassian: the same for a Jira description
+
 ## 0.1.11
 
 ### Patch Changes
