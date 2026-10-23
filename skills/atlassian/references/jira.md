@@ -33,6 +33,7 @@ atlassian-cli -f json jira issue create … --field 'parent={"key":"<epic key>"}
 atlassian-cli jira issue links create <blocker> <blocked> --link-type Blocks
 atlassian-cli -f json jira issue links list <blocked>                                    # confirm it reads "is blocked by <blocker>"
 atlassian-cli jira issue comments add <key> --body "<text>"
+atlassian-cli jira issue update <key> --description "$(cat <scratch>/issue.md)"   # the whole description
 atlassian-cli jira issue transition <key> --to-status "<status>" --dry-run              # then without --dry-run
 atlassian-cli -f json jira issue get <key>                                               # current status, before a transition
 atlassian-cli -f json jira api /rest/api/3/myself                                        # the logged-in user; its accountId
