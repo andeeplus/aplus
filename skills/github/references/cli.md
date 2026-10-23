@@ -23,6 +23,7 @@ gh issue edit <n> --type <name>                               # set the issue ty
 gh issue edit <n> --add-assignee @me                          # the logged-in user, when set in progress
 gh issue edit <n> --add-label <label> --milestone <title>
 gh issue edit <n> --parent <p> --add-blocked-by <m>
+gh issue edit <n> --body-file <scratch>/issue.md              # the whole body
 gh issue comment <n> --body-file <scratch>/comment.md
 gh issue close <n> --comment "Fixed in #<pr>"                 # fixed by a PR that merged into a non-default branch
 gh issue close <n> --reason "not planned" --comment "<why>"   # won't fix
