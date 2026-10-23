@@ -1,11 +1,11 @@
 ---
 name: deliver
-description: Take an idea, a ticket or a program of issues to pull requests ready to merge, through triage or define, one review of the issue drafts, then the build, the ship gate and the PR or PR stack for each issue. Use to deliver or implement a ticket, issue, idea, feature or program end to end.
+description: Take an idea, a ticket or a program of issues to pull requests ready to merge, through triage or define, a review of any issue drafts, then the build, the ship gate and the PR or PR stack for each issue. Use to deliver or implement a ticket, issue, idea, feature or program end to end.
 ---
 
 # Deliver
 
-Automatic from spec to PR, every gate included. It waits for the user only to review issue drafts, before a dangerous action, and, when a board exists, for the host skill's one-time board question.
+Automatic from spec to PR, every gate included. It waits for the user only to review the drafts [Drafts](#drafts) names, before a dangerous action, and, when a board exists, for the host skill's one-time board question.
 
 ## Rules
 
@@ -15,6 +15,17 @@ Automatic from spec to PR, every gate included. It waits for the user only to re
 - **Park, don't stop.** When an issue cannot go on (a triage verdict other than `real bug` or `request`, work that already exists, an issue another agent already has in progress or in review, an open decision, a question from debug that blocks the fix, or a `not ready` verdict), record why, write a [handoff](../handoff/SKILL.md) note if it has a branch, run the remove script unless the caller keeps the worktree, skip the issues it blocks, and continue.
 - **Build to the bar final-review applies** ([code-quality](../code-quality/SKILL.md)): the durable fix, inside the issue's scope, following the code around it. Work outside the scope becomes a draft.
 - **Keep the drafts in one scratch folder** outside the tree, unless the caller names one.
+
+## Drafts
+
+A draft is an issue that does not exist yet, written with [create-issue](../create-issue/SKILL.md). A ticket on the tracker is that issue: after its spec, build it.
+
+| When                                                 | Draft                                         |
+| ---------------------------------------------------- | --------------------------------------------- |
+| A ticket that stays one issue                        | none                                          |
+| An idea, and the project needs an issue              | The spec's issue, or every issue of a program |
+| Work that splits into a program                      | Each issue that does not exist yet            |
+| Out-of-scope work, a deferred finding, or a decision | That issue                                    |
 
 ## Script
 
@@ -26,8 +37,8 @@ node --experimental-strip-types <this skill's folder>/scripts/remove-worktree.mt
 
 ## Flow
 
-1. **Start.** A ticket goes to [triage](../triage/SKILL.md): a `real bug` goes to step 3, a `request` to define. An idea goes to [define](../define/SKILL.md). An issue with acceptance criteria, or a program of them, goes to step 3.
-2. **Review.** Ask define for the drafts with the spec: the spec's issue when the project needs one, every issue of a program, and the ticket edit for a ticket. Define's review is the run's one review; create the issues and publish the edit the user approves.
+1. **Start.** An issue with acceptance criteria, or a program of them, goes to step 3. A ticket without them goes to [triage](../triage/SKILL.md): a `real bug` goes to step 3, a `request` to define. An idea goes to [define](../define/SKILL.md).
+2. **Review.** Ask define for the spec, and only the drafts [Drafts](#drafts) names. Define's review is the run's one review; create the drafts the user approves. When the spec adds acceptance a ticket lacks, publish that as an edit of the ticket.
 3. **Run each issue** through steps 4 to 11, in "blocked by" order, without asking between them unless the user asked for pauses. In a program, run the claim, then hand the rest of that issue's pass to a fresh subagent briefed with the issue, its draft, the project instructions and that the claim is done, and keep only its output block here, so context stays small. A decision issue, and the work it blocks, waits for a maintainer. An issue too big to review as one PR, such as one sized `outcome`, ships as a stack: claim it once, then run the rest of the pass once per reviewable slice, each branch on the slice below ([stacks](../create-pr/references/stacks.md)).
 4. **Claim.** Read the issue's status as the host skill's board says. Park it when it is already in progress or in review, unless you are resuming it from its branch or a handoff note. Otherwise set it in progress and assign the logged-in user, as that board says, before creating the branch or changing code.
 5. **Branch** as [create-pr](../create-pr/SKILL.md) says.
