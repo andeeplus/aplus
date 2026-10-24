@@ -76,7 +76,7 @@ Every verdict is stamped with `write` before the run ends.
 
 5. **Fix once.** Apply every `easy` finding in one pass; write a missing release note with [commit-expert](../commit-expert/SKILL.md#release-notes). Do not commit.
 6. **Re-check.** Run step 2 again, then re-run only the reviewers whose findings you fixed. There is no second fix round for these reviewers.
-7. **Second model**, when chosen. With the checks green, invoke the [second-opinion](../second-opinion/SKILL.md) skill by name and run it on the same base, with notes on what steps 4 to 6 found, fixed and left. When the caller names a harness and model, pass them as `--harness` and `--model`. It runs at most three rounds and uses the same classes, and you verify each of its findings before acting on it.
+7. **Second model**, when chosen. With the checks green, invoke the [second-opinion](../second-opinion/SKILL.md) skill by name and run it on the same base, with notes on what steps 4 to 6 found, fixed and left. When the caller names a harness and model, pass them as `--harness` and `--model`. It runs at most three rounds and uses the same classes, and you verify each of its findings before acting on it. When the caller defers it for a layer of a stack, skip it: the caller runs it once over the whole stack ([stacks](../create-pr/references/stacks.md)).
 8. **Verdict.** Stamp it with the reviews that ran, then end with exactly one of:
 
     - `ready to ship`: every check is green, no `easy` finding is left, and every `rework` finding is fixed or logged.
