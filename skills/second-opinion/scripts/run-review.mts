@@ -9,7 +9,7 @@
  * rounds 2 and 3 what was done with each finding of the round before. `--self` is the model the caller runs on. The
  * reviewer is the first `harness:model[@effort]` entry in `APLUS_SECOND_OPINION_REVIEWERS` whose model family differs from
  * it; the variable comes from the environment or the repository's root `.env`. With no such entry, the script writes
- * the prompt to a file, prints its path and exits 2, for the caller to hand to a subagent on another model. `--harness`
+ * the prompt to a file, prints its path and exits 2, so the caller can ask for a harness and model. `--harness`
  * and `--model` skip the list. An optional `APLUS_SECOND_OPINION_<HARNESS>_API_KEY` is used instead of that harness's CLI
  * login. The reviewer's brief is ../references/brief.md.
  */
@@ -74,7 +74,7 @@ const HARNESSES: Partial<Record<string, (prompt: string, model: string, effort?:
 		prompt,
 	],
 	cursor: (prompt, model) => [
-		'cursor-agent',
+		'agent',
 		'-p',
 		'--trust',
 		'--mode',
@@ -235,10 +235,15 @@ if (isMain) {
 
 	const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 	const root = git('rev-parse', '--show-toplevel').trim();
-	try {
-		process.loadEnvFile(path.join(root, '.env'));
-	} catch (error) {
-		if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+	const mainRoot = path.dirname(git('rev-parse', '--path-format=absolute', '--git-common-dir').trim());
+	const envFiles = [path.join(root, '.env')];
+	if (mainRoot !== root) envFiles.push(path.join(mainRoot, '.env'));
+	for (const envFile of envFiles) {
+		try {
+			process.loadEnvFile(envFile);
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+		}
 	}
 
 	let picked: Reviewer | undefined;
@@ -284,7 +289,7 @@ if (isMain) {
 		const file = path.join(dir, 'prompt.md');
 		writeFileSync(file, prompt);
 		console.error(
-			`No reviewer from a family other than ${family(values.self ?? '')} is set in APLUS_SECOND_OPINION_REVIEWERS (${path.join(root, '.env')}). The review prompt is in ${file}: give it to a fresh, read-only subagent on another model, or run again with --harness and --model. The diff is beside it.`,
+			`No reviewer from a family other than ${family(values.self ?? '')} is set in APLUS_SECOND_OPINION_REVIEWERS (${envFiles.join(' or ')}). The review prompt is in ${file}: ask the user which harness and model to review with, then run again with that --harness and --model. The diff is beside it.`,
 		);
 		process.exit(2);
 	}
@@ -297,10 +302,18 @@ if (isMain) {
 
 	const [command, ...args] = HARNESSES[harness]!(prompt, model, effort, dir);
 	const result = spawnSync(command, args, { cwd: root, env, stdio: ['ignore', 'inherit', 'inherit'] });
-	rmSync(dir, { recursive: true, force: true });
+	if (result.error || result.status !== 0) {
+		const file = path.join(dir, 'prompt.md');
+		writeFileSync(file, prompt);
+		console.error(
+			`Review failed. The prompt is in ${file} and the diff is beside it; ask the user which reviewer to use next.`,
+		);
+	} else {
+		rmSync(dir, { recursive: true, force: true });
+	}
 	if (result.error) {
 		console.error(`Could not run ${command}. Install it and log in.`);
 		throw result.error;
 	}
-	process.exitCode = result.status ?? 1;
+	process.exitCode = result.status === 2 ? 1 : (result.status ?? 1);
 }
