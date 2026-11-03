@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.13
+
+### Patch Changes
+
+- c515ce5: second-opinion: run Cursor reviews with agent, keep the selected harness and model together, and ask before using a fallback
+- c515ce5: second-opinion: read the reviewer list from the main checkout when run in a linked worktree, and ask the user which model reviews rather than choosing one itself
+
 ## 0.1.12
 
 ### Patch Changes
