@@ -14,11 +14,15 @@ let log: string;
 let notes: string;
 
 /**
- * Runs the CLI in a scratch repository with fake `claude`, `cursor-agent`, `codex` and `opencode` first on `PATH` that log
+ * Runs the CLI in a scratch repository with fake `claude`, `agent`, `codex` and `opencode` first on `PATH` that log
  * their arguments.
  * The developer's own `APLUS_SECOND_OPINION_*` variables are dropped so only the scratch `.env` counts.
  */
 function run(...args: string[]) {
+	return runIn(repo, ...args);
+}
+
+function runIn(directory: string, ...args: string[]) {
 	const env = Object.fromEntries(
 		Object.entries(process.env).filter(([key]) => !key.startsWith('APLUS_SECOND_OPINION_')),
 	);
@@ -26,7 +30,7 @@ function run(...args: string[]) {
 		process.execPath,
 		['--experimental-strip-types', SCRIPT, '--base', 'main', '--notes', notes, ...args],
 		{
-			cwd: repo,
+			cwd: directory,
 			encoding: 'utf8',
 			env: { ...env, PATH: `${bin}${path.delimiter}${process.env.PATH}` },
 		},
@@ -42,10 +46,10 @@ beforeAll(() => {
 	writeFileSync(notes, 'Own review: fixed a missing null check; left the rename as a nit.\n');
 	mkdirSync(repo);
 	mkdirSync(bin);
-	for (const command of ['claude', 'cursor-agent', 'codex', 'opencode']) {
+	for (const command of ['claude', 'agent', 'codex', 'opencode']) {
 		writeFileSync(
 			path.join(bin, command),
-			`#!/usr/bin/env node\nrequire('node:fs').writeFileSync(${JSON.stringify(log)}, JSON.stringify({ argv: process.argv.slice(2), key: process.env.CURSOR_API_KEY, diff: (m => m ? require('node:fs').readFileSync(m[1], 'utf8') : undefined)(/(\\S+diff\\.patch)/.exec(process.argv.at(-1))) }));\n`,
+			`#!/usr/bin/env node\nrequire('node:fs').writeFileSync(${JSON.stringify(log)}, JSON.stringify({ command: require('node:path').basename(process.argv[1]), argv: process.argv.slice(2), key: process.env.CURSOR_API_KEY, diff: (m => m ? require('node:fs').readFileSync(m[1], 'utf8') : undefined)(/(\\S+diff\\.patch)/.exec(process.argv.at(-1))) }));\n`,
 		);
 		chmodSync(path.join(bin, command), 0o755);
 	}
@@ -71,7 +75,7 @@ beforeEach(() => {
 	rmSync(path.join(repo, '.env'), { force: true });
 });
 
-function harnessCall(): { argv: string[]; key?: string; diff?: string } {
+function harnessCall(): { command: string; argv: string[]; key?: string; diff?: string } {
 	return JSON.parse(readFileSync(log, 'utf8'));
 }
 
@@ -155,6 +159,7 @@ test('sends the brief, the round, the notes, every change since the merge base a
 	expect(result.stderr).toBe('');
 	expect(result.status).toBe(0);
 	const { argv, key, diff } = harnessCall();
+	expect(harnessCall().command).toBe('agent');
 	expect(key).toBe('review-key');
 	expect(argv).toEqual(expect.arrayContaining(['-p', '--trust', '--mode', 'ask', '--model', 'grok-4']));
 	const prompt = argv[argv.length - 1];
@@ -173,7 +178,26 @@ test('reviews on the harness and model passed as flags, ignoring the list', () =
 	const result = run('--harness', 'cursor', '--model', 'gpt-5.6-sol-high');
 
 	expect(result.status).toBe(0);
+	expect(harnessCall().command).toBe('agent');
 	expect(harnessCall().argv).toEqual(expect.arrayContaining(['--model', 'gpt-5.6-sol-high']));
+});
+
+test('saves the prompt after a reviewer fails so the user can choose a fallback', () => {
+	const agent = path.join(bin, 'agent');
+	const original = readFileSync(agent, 'utf8');
+	writeFileSync(agent, '#!/usr/bin/env node\nprocess.exit(2);\n');
+	try {
+		const result = run('--harness', 'cursor', '--model', 'grok-4');
+		expect(result.status).toBe(1);
+		expect(result.stderr).toContain('ask the user which reviewer to use next');
+		const prompt = /The prompt is in (\S+prompt\.md)/.exec(result.stderr)?.[1];
+		expect(prompt).toBeDefined();
+		expect(existsSync(prompt!)).toBe(true);
+		expect(existsSync(path.join(path.dirname(prompt!), 'diff.patch'))).toBe(true);
+		rmSync(path.dirname(prompt!), { recursive: true, force: true });
+	} finally {
+		writeFileSync(agent, original);
+	}
 });
 
 test.for(['2', '3'])('accepts round %s and names it in the prompt', (round) => {
@@ -212,4 +236,37 @@ test("allows Cursor's fast=false override, commas inside its brackets included",
 
 	expect(result.status).toBe(0);
 	expect(harnessCall().argv).toEqual(expect.arrayContaining(['--model', 'claude-opus-4-8[effort=high,fast=false]']));
+});
+
+test('reads the list from the main checkout when run in a linked worktree, which has no .env of its own', () => {
+	writeFileSync(path.join(repo, '.env'), 'APLUS_SECOND_OPINION_REVIEWERS=cursor:grok-4\n');
+	const worktree = path.join(root, 'worktree');
+	execFileSync('git', ['worktree', 'add', '--detach', worktree, 'feature'], { cwd: repo });
+
+	try {
+		expect(existsSync(path.join(worktree, '.env'))).toBe(false);
+		const result = runIn(worktree, '--self', 'claude-opus-5-5');
+
+		expect(result.status).toBe(0);
+		expect(harnessCall().argv).toEqual(expect.arrayContaining(['--model', 'grok-4']));
+	} finally {
+		execFileSync('git', ['worktree', 'remove', '--force', worktree], { cwd: repo });
+	}
+});
+
+test('names every .env the list was read from when no reviewer is from another family', () => {
+	writeFileSync(path.join(repo, '.env'), 'APLUS_SECOND_OPINION_REVIEWERS=cursor:claude-4.5-sonnet\n');
+	const worktree = path.join(root, 'worktree');
+	execFileSync('git', ['worktree', 'add', '--detach', worktree, 'feature'], { cwd: repo });
+
+	try {
+		const result = runIn(worktree, '--self', 'claude-opus-5-5');
+
+		expect(result.status).toBe(2);
+		expect(result.stderr).toContain(worktree);
+		expect(result.stderr).toContain(repo);
+		expect(result.stderr).toContain('ask the user which harness and model');
+	} finally {
+		execFileSync('git', ['worktree', 'remove', '--force', worktree], { cwd: repo });
+	}
 });
