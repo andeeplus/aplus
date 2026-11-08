@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.14
+
+### Patch Changes
+
+- d67471e: audit: execute a program in deliver's tracks, and keep audits in the primary checkout so every worktree shares one and removing a worktree keeps it
+- d67471e: create-pr: open one PR per issue, or one per track when deliver groups a program's issues
+- d67471e: deliver: ship a program in tracks, groups of about three issues that each open one PR with each issue as its own commits, from a plan the user confirms once; the gate runs once per track, or after each issue with issue gates
+- d67471e: final-review: accept a commit as the base, so a track's issue gates review one issue at a time
+- d67471e: handoff: write notes to `handoffs/<branch>.md` under the audit dir (default `.audit`), shared by every worktree; the note script asks to gitignore the dir when needed, and `--list` finds notes on pick-up
+
 ## 0.1.13
 
 ### Patch Changes
