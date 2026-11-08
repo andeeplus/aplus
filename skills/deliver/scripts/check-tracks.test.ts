@@ -42,11 +42,18 @@ test('prints each base and the blockers outside the plan', () => {
 	});
 });
 
-test('stacks on a chain that holds every blocker, and waits when two chains are needed', () => {
+test('stacks on the latest blocking track, and waits only for blocking tracks outside that stack', () => {
 	const chain = `## a: A\n- #1 x\n## b: B\n- #2 y (blocked by #1)\n## c: C\n- #3 z (blocked by #1, #2)\n`;
 	expect(checkTracks(parseTracks(chain)).lines.at(-1)).toBe('c: 1 issues, stacks on b');
 	const split = `## a: A\n- #1 x\n## b: B\n- #2 y\n## c: C\n- #3 z (blocked by #1, #2)\n`;
-	expect(checkTracks(parseTracks(split)).lines.at(-1)).toBe('c: 1 issues, waits for a, b');
+	expect(checkTracks(parseTracks(split)).lines.at(-1)).toBe('c: 1 issues, stacks on b, waits for a');
+	const deep = `${split}## d: D\n- #4 w (blocked by #3, #1)\n`;
+	expect(checkTracks(parseTracks(deep)).lines.at(-1)).toBe('d: 1 issues, stacks on c');
+});
+
+test('flags a track over the soft limit without failing', () => {
+	const big = `## a: A\n- #1 x\n- #2 y\n- #3 z\n- #4 w\n`;
+	expect(checkTracks(parseTracks(big))).toEqual({ errors: [], lines: ['a: 4 issues, base, over the soft limit'] });
 });
 
 test('rejects duplicates, empty tracks, late blockers and a plan that differs from the program', () => {

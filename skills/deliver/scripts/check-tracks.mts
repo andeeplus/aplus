@@ -9,13 +9,18 @@
  *
  * It fails when an issue appears twice, a track is empty, a blocker comes later in the plan, or, with `--expect`, the
  * plan misses a program issue or names another. It prints one line per track: `base` when it builds on the
- * integration branch, `stacks on <key>` when its blockers sit in one track's chain, or `waits for <keys>` when they
- * sit in tracks that must merge first. Then `outside <refs>`: blockers not in the plan, which must already be merged.
+ * integration branch, or `stacks on <key>` on the latest track holding a blocker, adding `, waits for <keys>` for the
+ * tracks with a blocker that this stack does not already include, which must merge first. A track over the soft limit
+ * of {@link SOFT_LIMIT} issues ends with `, over the soft limit`. Then `outside <refs>`: blockers not in the plan, which
+ * must already be merged.
  */
 import { readFileSync, realpathSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 
 export type Track = { key: string; title: string; issues: { ref: string; blockedBy: string[] }[] };
+
+/** Issues per track before a track needs a reason to stay whole. */
+export const SOFT_LIMIT = 3;
 
 const HEADING = /^## +([^:\s]+): *(.+)$/;
 const ISSUE = /^[-*] +(\S+)(.*)$/;
@@ -80,14 +85,11 @@ export function checkTracks(tracks: Track[], expect?: string[]): Plan {
 		const top = Math.max(-1, ...needs);
 		const chain = top === -1 ? new Set<number>() : new Set([top, ...below[top]]);
 		const waits = [...needs].filter((need) => !chain.has(need));
-		below[t] = waits.length || top === -1 ? new Set() : chain;
-		const base =
-			top === -1
-				? 'base'
-				: waits.length
-					? `waits for ${[...needs].map((need) => tracks[need].key).join(', ')}`
-					: `stacks on ${tracks[top].key}`;
-		lines.push(`${track.key}: ${track.issues.length} issues, ${base}`);
+		below[t] = new Set([...chain, ...waits]);
+		const base = top === -1 ? 'base' : `stacks on ${tracks[top].key}`;
+		const wait = waits.length ? `, waits for ${waits.map((need) => tracks[need].key).join(', ')}` : '';
+		const over = track.issues.length > SOFT_LIMIT ? ', over the soft limit' : '';
+		lines.push(`${track.key}: ${track.issues.length} issues, ${base}${wait}${over}`);
 	});
 	if (outside.size) lines.push(`outside ${[...outside].join(', ')}`);
 	return { errors, lines };

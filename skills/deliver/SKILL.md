@@ -13,7 +13,7 @@ Automatic from spec to PR, every gate included. It waits for the user only to re
 - **Confirm a program's track plan** once, before the first claim, as [Tracks](#tracks) says.
 - **Ask before a dangerous action:** one that is hard to undo or reaches past the change, such as merging, force-pushing, deleting a branch or data, a migration that could break a running system or lose data, a deploy, or changing repository or CI settings. The remove script keeps the branch, so running it needs no ask.
 - **Ask for nothing else.** Asking to deliver approves each push, PR and PR body edit, and answers the waits in triage, final-review and create-pr. Resolve a target, merge method or branch name from the project and the host skill. When a board exists, ask that skill's one-time question, then move the issue as it says. Set in progress and assign the logged-in user before creating the branch or changing code. Do not set done: that waits for merge.
-- **Park, don't stop.** When an issue cannot go on (a triage verdict other than `real bug` or `request`, work that already exists, an issue another agent already has in progress or in review, an open decision, a question from debug that blocks the fix, or a `not ready` verdict), record why, write a [handoff](../handoff/SKILL.md) note if it has a branch, run the remove script unless the caller keeps the worktree, skip the issues it blocks, and continue. In a track, the parked issue leaves it: move its commits, and those of the issues it blocks, to a branch of their own, and ship the rest.
+- **Park, don't stop.** When an issue cannot go on (a triage verdict other than `real bug` or `request`, work that already exists, an issue another agent already has in progress or in review, an open decision, a question from debug that blocks the fix, or a `not ready` verdict), record why, write a [handoff](../handoff/SKILL.md) note if it has a branch, run the remove script unless the caller keeps the worktree, skip the issues it blocks, and continue. In a track, it leaves the track as [Tracks](#tracks) says.
 - **Build to the bar final-review applies** ([code-quality](../code-quality/SKILL.md)): the durable fix, inside the issue's scope, following the code around it. Work outside the scope becomes a draft.
 - **Keep the drafts in one scratch folder** outside the tree, unless the caller names one.
 
@@ -32,9 +32,16 @@ A draft is an issue that does not exist yet, written with [create-issue](../crea
 
 A track is a group of a program's issues that ships as one branch and one PR, with each issue as its own commits. It keeps every issue on the tracker while cutting the PRs, CI runs and reviews a program costs.
 
-- **Group by outcome.** One track per coherent change a reviewer reads in one sitting: issues that touch the same code or share a design, with each bug in the track of the change that fixes it. Split a track that outgrows one sitting.
+- **Group by outcome.** One track per coherent change a reviewer reads in one sitting: issues that touch the same code or share a design, with each bug in the track of the change that fixes it.
+- **Keep to three issues.** Split a larger track, or say in the plan why it stays whole; the check script flags each one over the limit.
 - **Order by "blocked by".** Issues inside a track in build order; tracks in delivery order. A track whose blockers sit in an earlier track stacks on it.
 - **Plan once.** Write the plan from [assets/tracks.md](assets/tracks.md) beside the drafts, run the check script with `--expect` listing every open change issue of the program, and show the plan with the script's output. The user confirms it or regroups; a track of one issue is a PR of its own. Then run it without asking again.
+- **Gate the track once.** Final-review runs after the last issue's commits, over the whole branch, never per issue.
+- **Park inside a track** when an issue cannot go on after its track started:
+    1. Move its commits, and those of every issue that builds on it, to a branch of its own from the track's base, with a handoff note. An issue builds on it when it lists it as a blocker or its checks fail without it.
+    2. Run the project's checks on what stays. Move each issue whose checks now fail, and repeat until they pass.
+    3. When the gate already ran, run it again on what stays.
+    4. Open the PR for the issues that stay. The report names each moved issue, its branch and why.
 
 ## Script
 
@@ -44,7 +51,7 @@ Removes the current linked worktree when the tree is clean and the branch is pus
 node --experimental-strip-types <this skill's folder>/scripts/remove-worktree.mts
 ```
 
-Checks a track plan: each issue in one place, no blocker later than the issue it blocks, and with `--expect` exactly the program's issues. It prints each track's base (`base`, `stacks on <key>` or `waits for <keys>`) and the blockers outside the plan, which must already be merged.
+Checks a track plan: each issue in one place, no blocker later than the issue it blocks, and with `--expect` exactly the program's issues. It prints each track's base: `base` for the integration branch, or `stacks on <key>`, adding `waits for <keys>` for tracks with a blocker that must merge first. It flags a track `over the soft limit` and lists the blockers outside the plan, which must already be merged.
 
 ```sh
 node --experimental-strip-types <this skill's folder>/scripts/check-tracks.mts <tracks.md> [--expect <ref>,<ref>...]
@@ -61,7 +68,7 @@ node --experimental-strip-types <this skill's folder>/scripts/check-tracks.mts <
     - A bug: its [Gherkin scenario](../gherkin/SKILL.md#a-bugs-scenario), in the PR body when the ticket has none, then [debug](../debug/SKILL.md).
     - A task: for each acceptance scenario, a test that fails first ([testing](../testing/SKILL.md)), then the code that makes it pass.
     - A refactor: the existing tests stay green; add one first where none covers the behaviour.
-7. **Gate.** Run [final-review](../final-review/SKILL.md); it chooses its reviews. When the caller named a second-opinion harness and model, pass them on. Fix what fits the issue's scope, red checks included. Draft the rest with [create-issue](../create-issue/SKILL.md): a decision when the fix is unclear or a program of its own. Keep nits for the PR body. If you changed the branch, run final-review once more and draft any new out-of-scope finding. A drafted finding counts as logged, since the user reviews drafts at the end; when the verdict is still `not ready`, park the issue and include its drafts in the report.
+7. **Gate.** Run [final-review](../final-review/SKILL.md); it chooses its reviews. When the caller named a second-opinion harness and model, pass them on. Fix what fits the issue's scope, red checks included. Draft the rest with [create-issue](../create-issue/SKILL.md): a decision when the fix is unclear or a program of its own. Keep nits for the PR body. In a track, brief the second opinion with the issues in commit order, each with its commit range, ask each finding to name its issue, and commit each fix with that issue's `Refs:` footer. If you changed the branch, run final-review once more and draft any new out-of-scope finding. A drafted finding counts as logged, since the user reviews drafts at the end; when the verdict is still `not ready`, park the issue and include its drafts in the report.
 8. **Commit** with [commit-expert](../commit-expert/SKILL.md). In a track, each issue's commits name only that issue.
 9. **Open the PR** with create-pr. Name each deferred finding by title, and give the reviews that ran, with the reason for each skipped.
 10. **Worktree.** Run the remove script, unless the caller keeps the worktree.
