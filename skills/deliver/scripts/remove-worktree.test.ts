@@ -48,7 +48,7 @@ test('keeps the primary checkout and a locked worktree, and removes a handed-off
 		sh(linked, 'commit', '-qm', 'edit');
 		expect(run(linked).stdout).toBe('kept unpushed\n');
 
-		const note = path.resolve(linked, sh(linked, 'rev-parse', '--git-common-dir').trim(), 'handoff/fix/thing.md');
+		const note = path.join(repo, '.audit/handoffs/fix/thing.md');
 		mkdirSync(path.dirname(note), { recursive: true });
 		writeFileSync(note, 'paused\n');
 		sh(repo, 'worktree', 'lock', linked);

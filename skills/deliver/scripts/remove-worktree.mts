@@ -4,7 +4,8 @@
  * Usage: node --experimental-strip-types remove-worktree.mts
  *
  * It removes this checkout when it is a linked worktree that no harness manages, the tree is clean, and the branch is
- * pushed or a handoff note exists. The branch stays, and so does the primary checkout. It prints `kept <reason>`, or
+ * pushed or a handoff note exists in `handoffs/` under the first `APLUS_AUDIT_DIRS` entry (default `.audit`), resolved
+ * from the primary checkout as the handoff skill writes it. The branch stays, and so does the primary checkout. It prints `kept <reason>`, or
  * `removed <path>` then `continue in <primary checkout>`.
  */
 import { execFileSync } from 'node:child_process';
@@ -40,6 +41,30 @@ function git(cwd: string, args: string[]): string {
 	return execFileSync('git', args, { cwd, encoding: 'utf8' });
 }
 
+/** Where the handoff skill writes `branch`'s note: `handoffs/` under the first `APLUS_AUDIT_DIRS` entry, or `.audit`. */
+export function handoffNote(primary: string, branch: string, value: string | undefined): string {
+	let project = '';
+	try {
+		project = execFileSync('git', ['remote', 'get-url', 'origin'], {
+			cwd: primary,
+			encoding: 'utf8',
+			stdio: ['ignore', 'pipe', 'ignore'],
+		}).trim();
+	} catch {}
+	const name = (
+		project
+			.replace(/\.git$/, '')
+			.split(/[/:\\]/)
+			.pop() || path.basename(primary)
+	).replace(/[^\w.-]/g, '-');
+	const first =
+		(value ?? '')
+			.split(',')
+			.map((entry) => entry.trim())
+			.find(Boolean) ?? '.audit';
+	return path.resolve(primary, first.replaceAll('{project}', name), 'handoffs', `${branch}.md`);
+}
+
 /** Removes the worktree at `cwd` when it is safe, and returns the lines to print. */
 export function removeWorktree(cwd: string): string[] {
 	const toplevel = git(cwd, ['rev-parse', '--show-toplevel']).trim();
@@ -47,6 +72,15 @@ export function removeWorktree(cwd: string): string[] {
 	const common = realpathSync(path.resolve(cwd, git(cwd, ['rev-parse', '--git-common-dir']).trim()));
 	const branch = git(cwd, ['rev-parse', '--abbrev-ref', 'HEAD']).trim();
 	const entries = git(cwd, ['worktree', 'list', '--porcelain']).split('\n\n');
+	const primary = entries[0]?.split('\n')[0]?.replace(/^worktree /, '');
+	if (!primary) throw new Error('No primary worktree');
+	for (const root of new Set([toplevel, primary])) {
+		try {
+			process.loadEnvFile(path.join(root, '.env'));
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+		}
+	}
 	const own = entries.find((entry) => entry.split('\n')[0] === `worktree ${toplevel}`) ?? '';
 	let pushed = false;
 	try {
@@ -62,11 +96,9 @@ export function removeWorktree(cwd: string): string[] {
 		managed: harnessManaged(toplevel) || own.split('\n').some((line) => line.startsWith('locked')),
 		clean: git(cwd, ['status', '--porcelain']).trim() === '',
 		pushed,
-		handoff: existsSync(path.join(common, 'handoff', `${branch}.md`)),
+		handoff: existsSync(handoffNote(primary, branch, process.env.APLUS_AUDIT_DIRS)),
 	});
 	if (decision !== 'remove') return [`kept ${decision}`];
-	const primary = entries[0]?.split('\n')[0]?.replace(/^worktree /, '');
-	if (!primary) throw new Error('No primary worktree');
 	execFileSync('git', ['-C', primary, 'worktree', 'remove', toplevel], { encoding: 'utf8' });
 	return [`removed ${toplevel}`, `continue in ${primary}`];
 }
