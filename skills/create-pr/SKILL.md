@@ -13,7 +13,7 @@ Commands and formats come from the skill for the project's host, such as [github
 
 - **Read the contribution guidance and PR template.** Resolve the target branch and merge method through the host skill, and release-note requirements through [commit-expert](../commit-expert/SKILL.md). Use the documented default when the project states none.
 
-- **Open one PR per issue, or per track** when [deliver](../deliver/SKILL.md#tracks) groups a program's issues: the PR resolves each issue in the track, and its branch is named for the first. Every commit on it names its issue in a `Refs:` footer, as [commit-expert](../commit-expert/SKILL.md) says; the host skill gives the issue's form. Where the project allows work without an issue, omit the footer.
+- **Open one PR per issue, or per track** when [deliver](../deliver/references/programs.md) groups a program's issues: the PR resolves each issue in the track, and its branch is named for the first. Every commit on it names its issue in a `Refs:` footer, as [commit-expert](../commit-expert/SKILL.md) says; the host skill gives the issue's form. Where the project allows work without an issue, omit the footer.
 - **Name the branch `type/ticket-slug`.** The type is the kind of change, such as `feat`, `fix` or `refactor`, and the ticket is the issue key in the host's form. With no issue, use `type/slug`.
 
 ## References
