@@ -14,7 +14,14 @@ Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). T
 - **Correct over convenient.** Choose the long-term right fix. No workarounds, stubs, or docs that paper over a bad contract.
 - **Push for truth.** Types, tests, runtime behaviour and docs must agree.
 - **Sync after every change.** Each time you write, edit or create anything in the audit dir, including issue drafts, `manifest.json` and `tracks.md`, run `new-audit.mts --sync`. With no mirror it does nothing, so always run it.
-- **Ask when the audit is missing.** An audit lives only in the audit dirs. Before reading one, run `new-audit.mts --find [scope-slug]`. When it exits 1, such as on a fresh clone or another machine, ask the user where the audit is, or whether to work from the tracker's issues alone. For the issues alone, take the tracker and project from the project's instructions, asking when they do not name them, then read the tracking issue and its children with the platform skill ([github](../github/SKILL.md) or [atlassian](../atlassian/SKILL.md)) and run Execute with each issue's acceptance as the steps.
+- **Ask when the audit is missing.** An audit lives only in the audit dirs. Before reading one, run `new-audit.mts --find [scope-slug]`. When it exits 1, such as on a fresh clone or another machine, ask the user where the audit is, or whether to work from the tracker's issues alone. For the issues alone, take the tracker and project from the project's instructions, asking when they do not name them, then read the tracking issue and its children with the platform skill ([github](../github/SKILL.md) or [atlassian](../atlassian/SKILL.md)) and run [Execute](references/execute.md) with each issue's acceptance as the steps.
+
+## References
+
+| Task                                      | Read                                           |
+| ----------------------------------------- | ---------------------------------------------- |
+| File the findings as issues               | [references/issues.md](references/issues.md)   |
+| Execute the program's issues with deliver | [references/execute.md](references/execute.md) |
 
 ## Posture
 
@@ -81,39 +88,6 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --ex
 - **Find:** `--find` prints the audits in the working copy, or the one for a scope, and exits 1 when there are none.
 - **Excerpt:** `--excerpt` prints the bug, theme or move for each key. A theme includes its moves. It exits 1 when a key has no section.
 - **Cross-audit:** the first author writes the full set. Each further author writes only `review-{author-slug}.md` from the same template, without reading the first author's files until their own findings are written. Once every author's file exists, write `synthesis.md` before drafting issues.
-
-## Issues (on request)
-
-1. Draft one file per issue in `issues/` with [create-issue](../create-issue/SKILL.md), at the issue size from Clarify:
-
-    | Source                            | Draft                                                                                           |
-    | --------------------------------- | ----------------------------------------------------------------------------------------------- |
-    | `bugs.md` entries                 | Bugs, each `blockedBy` the task whose change is the right fix when the two stay separate issues |
-    | Moves under a theme               | Tasks                                                                                           |
-    | A theme larger than one issue     | A tracking issue, with its tasks as children                                                    |
-    | Each open question in `README.md` | A decision                                                                                      |
-
-    Use the closest form the project has for each kind. A balanced audit yields bugs and decisions only.
-
-2. Link each draft to the audit with an `audit` list in its frontmatter, such as `audit: [T2, M2.1, M2.3]`. The issue script does not publish it. The body carries the intent from the audit: the problem with its evidence, the design the change reaches, and the acceptance. The audit keeps the steps.
-3. Create them as create-issue says: duplicate check, show the user each draft with its `audit` keys, create only after they confirm.
-
-## Execute (on request)
-
-Run the program's open change issues with [deliver](../deliver/SKILL.md) in [tracks](../deliver/SKILL.md#tracks), one fresh subagent per track, one track at a time, all in one worktree. A subagent cannot ask the user, so settle the reviewer and the tracks first, in one round:
-
-1. **Tracks.** Write `tracks.md` beside `issues/`, starting from one track per theme with the bugs its moves fix, and check and show it with the gate question, as deliver's Tracks section says. Pass the chosen gate to each track's subagent.
-2. **Reviewer.** When `APLUS_SECOND_OPINION_REVIEWERS`, in the environment or the repository's `.env`, lists no reviewer from a model family other than yours, ask once which harness (`claude`, `codex`, `cursor` or `opencode`) and exact model id run the [second opinion](../second-opinion/SKILL.md). Offer to save the answer to `.env` as `APLUS_SECOND_OPINION_REVIEWERS=<harness>:<model>` when `.env` is gitignored, and write it only if the user agrees.
-3. **Each track.** Start a subagent with the absolute path of deliver's `SKILL.md`, the track with its base, each issue with its draft path and the `--excerpt` of the keys it was drafted from, the worktree path, and the reviewer from step 2. Tell it to skip deliver's worktree step and to return only deliver's output block. Keep the block and the drafts it names. The excerpt holds the steps and may change while building; each issue's acceptance is what must hold.
-4. **Worktree.** At hand off, run deliver's [remove script](../deliver/scripts/remove-worktree.mts) from the program worktree.
-
-Within an audit:
-
-- Deliver's draft folder is the program's `issues/`, so its drafts share the `manifest.json`.
-- Claim the track's issues, as deliver does, before its subagent starts. Pass the subagent their draft paths and the audit entries their `audit` lists name, with the claims already done. Between tracks, this context holds the `manifest.json`, `tracks.md` and each track's output block.
-- After the claim, and before the branch, match the issue to its draft in `issues/` (`manifest.json` maps each draft key to its issue) and read the audit entries that draft's `audit` list names. They are the steps, and may change while building; the issue's acceptance is what must hold.
-- A finding that is a program of its own stays a decision draft; propose an audit for it at hand off.
-- Keep audit keys and audit dir paths out of branch names, titles and bodies. Track keys stay local too.
 
 ## Hand off
 
