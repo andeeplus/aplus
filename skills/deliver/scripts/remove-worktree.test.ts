@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'nod
 import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from 'vitest';
-import { harnessManaged, removeWorktree, worktreeDecision } from './remove-worktree.mts';
+import { auditDirsValue, handoffNote, harnessManaged, removeWorktree, worktreeDecision } from './remove-worktree.mts';
 
 const SCRIPT = path.join(import.meta.dirname, 'remove-worktree.mts');
 
@@ -15,6 +15,29 @@ test('removes a clean linked worktree no harness manages, once its branch is pus
 	expect(worktreeDecision({ ...safe, pushed: false })).toBe('unpushed');
 	expect(worktreeDecision(safe)).toBe('remove');
 	expect(worktreeDecision({ ...safe, pushed: false, handoff: true })).toBe('remove');
+});
+
+test('handoffNote matches the handoff skill: first APLUS_AUDIT_DIRS entry, .audit by default, {project}', () => {
+	expect(handoffNote(undefined, '/r', 'p', 'fix/x')).toBe('/r/.audit/handoffs/fix/x.md');
+	expect(handoffNote('notes, /v', '/r', 'p', 'b')).toBe('/r/notes/handoffs/b.md');
+	expect(handoffNote('/v/{project}', '/r', 'p', 'b')).toBe('/v/p/handoffs/b.md');
+});
+
+test('auditDirsValue prefers the environment, then the first .env that sets it, without changing the environment', () => {
+	const dir = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'env-')));
+	try {
+		const a = path.join(dir, 'a');
+		const b = path.join(dir, 'b');
+		mkdirSync(a);
+		mkdirSync(b);
+		writeFileSync(path.join(b, '.env'), 'APLUS_AUDIT_DIRS=notes\n');
+		const env = {};
+		expect(auditDirsValue(env, [a, b])).toBe('notes');
+		expect(env).toEqual({});
+		expect(auditDirsValue({ APLUS_AUDIT_DIRS: '' }, [a, b])).toBe('');
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
 });
 
 test('a worktree under a harness folder is managed', () => {
@@ -36,7 +59,7 @@ test('keeps the primary checkout and a locked worktree, and removes a handed-off
 		writeFileSync(path.join(repo, 'a.txt'), 'a\n');
 		sh(repo, 'add', 'a.txt');
 		sh(repo, 'commit', '-qm', 'init');
-		const run = (cwd: string) => ({ stdout: removeWorktree(cwd).join('\n') + '\n' });
+		const run = (cwd: string) => ({ stdout: removeWorktree(cwd, {}).join('\n') + '\n' });
 
 		expect(run(repo).stdout).toBe('kept primary\n');
 
@@ -48,7 +71,7 @@ test('keeps the primary checkout and a locked worktree, and removes a handed-off
 		sh(linked, 'commit', '-qm', 'edit');
 		expect(run(linked).stdout).toBe('kept unpushed\n');
 
-		const note = path.resolve(linked, sh(linked, 'rev-parse', '--git-common-dir').trim(), 'handoff/fix/thing.md');
+		const note = path.join(repo, '.audit/handoffs/fix/thing.md');
 		mkdirSync(path.dirname(note), { recursive: true });
 		writeFileSync(note, 'paused\n');
 		sh(repo, 'worktree', 'lock', linked);
