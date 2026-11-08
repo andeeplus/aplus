@@ -57,6 +57,7 @@ One word per concept, in every skill and reference. Skills ship without this fil
 | **gate**, **verdict**  | A check that must pass; its one-line result.                                         |
 | **finding**            | A review result, classed `easy`, `nit` or `rework`.                                  |
 | **track**              | A group of a program's issues shipped as one branch and one PR, a commit per issue.  |
+| **issue gates**        | A track gated after each issue's commits instead of once over the track.             |
 | **draft**              | An issue as a file, before it is created.                                            |
 | **scratch file**       | A file outside the tree, never committed.                                            |
 | **loop**               | The one command that reproduces a symptom.                                           |
