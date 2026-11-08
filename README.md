@@ -96,7 +96,7 @@ The skills chain into one flow. Each step names the skill that runs it, and each
 2. **Plan.** [define](skills/define/SKILL.md) turns an idea or a ticket into a spec: scope, the code it touches, acceptance scenarios and open decisions. [create-issue](skills/create-issue/SKILL.md) turns the decision or the spec into an issue that stands alone, or an ordered program of them. [gherkin](skills/gherkin/SKILL.md) writes the expected behaviour as scenarios.
 3. **Build.** [debug](skills/debug/SKILL.md) proves a bug's root cause with a failing loop. [testing](skills/testing/SKILL.md) picks the test layer and writes the test that fails first.
 4. **Gate.** [final-review](skills/final-review/SKILL.md) runs the checks, then the reviews the agent judges the change needs: tests, code quality, docs and a [second-opinion](skills/second-opinion/SKILL.md), with one fix round. It ends with `ready to ship` or `not ready`, naming any review it skipped and why, and a later run reuses that verdict while the change is the same.
-5. **Ship.** [commit-expert](skills/commit-expert/SKILL.md) writes the commits and release note. [create-pr](skills/create-pr/SKILL.md) opens one PR per issue, stacks dependent work, answers reviews and merges when asked.
+5. **Ship.** [commit-expert](skills/commit-expert/SKILL.md) writes the commits and release note. [create-pr](skills/create-pr/SKILL.md) opens one PR per issue or per track of grouped issues, stacks dependent work, answers reviews and merges when asked.
 6. **Pause.** [handoff](skills/handoff/SKILL.md) writes a note a fresh agent can resume from.
 
 [github](skills/github/SKILL.md) and [atlassian](skills/atlassian/SKILL.md) run the host commands for steps 2 and 5.
@@ -115,7 +115,7 @@ The skills chain into one flow. Each step names the skill that runs it, and each
 | [second-opinion](skills/second-opinion/SKILL.md)                   | A different agent and model reviews a finished change, read-only, in at most three rounds                                           |
 | [final-review](skills/final-review/SKILL.md)                       | Ship gate: the checks, then the reviews the agent picks for the change; a ready or not-ready verdict                                |
 | [create-issue](skills/create-issue/SKILL.md)                       | Issues that stand alone: duplicate check, problem and evidence first, programs of ordered issues                                    |
-| [create-pr](skills/create-pr/SKILL.md)                             | Open pull requests: one per issue, dependent work stacked, reviews answered, merged only when asked                                 |
+| [create-pr](skills/create-pr/SKILL.md)                             | Open pull requests: one per issue or track, dependent work stacked, reviews answered, merged only when asked                        |
 | [atlassian](skills/atlassian/SKILL.md)                             | Bitbucket pull requests and pipelines, Jira issues, an optional board, Confluence pages, through atlassian-cli                      |
 | [github](skills/github/SKILL.md)                                   | Issues from validated draft files, pull requests and stacks with gh-stack, an optional project board, checks and reviews through gh |
 | [audit](skills/audit/SKILL.md)                                     | Audit an area into local notes, turn findings into issues, carry them through to merged PRs                                         |

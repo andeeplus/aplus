@@ -13,7 +13,7 @@ Use the project's domain terms (`CONTEXT.md` or its equivalent, when present). T
 
 - **Correct over convenient.** Choose the long-term right fix. No workarounds, stubs, or docs that paper over a bad contract.
 - **Push for truth.** Types, tests, runtime behaviour and docs must agree.
-- **Sync after every change.** Each time you write, edit or create anything in the audit dir, including issue drafts and `manifest.json`, run `new-audit.mts --sync`. With no mirror it does nothing, so always run it.
+- **Sync after every change.** Each time you write, edit or create anything in the audit dir, including issue drafts, `manifest.json` and `tracks.md`, run `new-audit.mts --sync`. With no mirror it does nothing, so always run it.
 - **Ask when the audit is missing.** An audit lives only in the audit dirs. Before reading one, run `new-audit.mts --find [scope-slug]`. When it exits 1, such as on a fresh clone or another machine, ask the user where the audit is, or whether to work from the tracker's issues alone. For the issues alone, take the tracker and project from the project's instructions, asking when they do not name them, then read the tracking issue and its children with the platform skill ([github](../github/SKILL.md) or [atlassian](../atlassian/SKILL.md)) and run Execute with each issue's acceptance as the steps.
 
 ## Posture
@@ -41,6 +41,7 @@ Artifacts go under the audit dir. Check that it is gitignored when it is inside 
   review-{author-slug}.md  further authors' reviews
   synthesis.md             cross-audit only: where the authors agree and differ
   issues/                  issue drafts and manifest.json
+  tracks.md                the track plan, when the program is executed
 ```
 
 - **Date folder:** the date the program's first audit started. Everything for that program, including other authors' reviews, drafts and later days' work, stays in it, so the drafts share one `manifest.json`.
@@ -99,19 +100,20 @@ node --experimental-strip-types <this skill's folder>/scripts/new-audit.mts --ex
 
 ## Execute (on request)
 
-Run the program's open change issues with [deliver](../deliver/SKILL.md), one fresh subagent per issue, one at a time in "blocked by" order, all in one worktree. A subagent cannot ask the user, so settle the reviewer first:
+Run the program's open change issues with [deliver](../deliver/SKILL.md) in [tracks](../deliver/SKILL.md#tracks), one fresh subagent per track, one track at a time, all in one worktree. A subagent cannot ask the user, so settle the reviewer and the tracks first, in one round:
 
-1. **Reviewer.** When `APLUS_SECOND_OPINION_REVIEWERS`, in the environment or the repository's `.env`, lists no reviewer from a model family other than yours, ask once which harness (`claude`, `codex`, `cursor` or `opencode`) and exact model id run the [second opinion](../second-opinion/SKILL.md). Offer to save the answer to `.env` as `APLUS_SECOND_OPINION_REVIEWERS=<harness>:<model>` when `.env` is gitignored, and write it only if the user agrees.
-2. **Each issue.** Start a subagent with the absolute path of deliver's `SKILL.md`, the issue, its draft path, the `--excerpt` of the keys it was drafted from, the worktree path, and the reviewer from step 1. Tell it to skip deliver's worktree step and to return only deliver's output block. Keep the block and the drafts it names. The excerpt holds the steps and may change while building; the issue's acceptance is what must hold.
-3. **Worktree.** At hand off, run deliver's [remove script](../deliver/scripts/remove-worktree.mts) from the program worktree.
+1. **Tracks.** Write `tracks.md` beside `issues/`, starting from one track per theme with the bugs its moves fix, and check and show it as deliver's Tracks section says.
+2. **Reviewer.** When `APLUS_SECOND_OPINION_REVIEWERS`, in the environment or the repository's `.env`, lists no reviewer from a model family other than yours, ask once which harness (`claude`, `codex`, `cursor` or `opencode`) and exact model id run the [second opinion](../second-opinion/SKILL.md). Offer to save the answer to `.env` as `APLUS_SECOND_OPINION_REVIEWERS=<harness>:<model>` when `.env` is gitignored, and write it only if the user agrees.
+3. **Each track.** Start a subagent with the absolute path of deliver's `SKILL.md`, the track with its base, each issue with its draft path and the `--excerpt` of the keys it was drafted from, the worktree path, and the reviewer from step 2. Tell it to skip deliver's worktree step and to return only deliver's output block. Keep the block and the drafts it names. The excerpt holds the steps and may change while building; each issue's acceptance is what must hold.
+4. **Worktree.** At hand off, run deliver's [remove script](../deliver/scripts/remove-worktree.mts) from the program worktree.
 
 Within an audit:
 
 - Deliver's draft folder is the program's `issues/`, so its drafts share the `manifest.json`.
-- Claim the issue, as deliver does, before its subagent starts. Pass the subagent its draft path and the audit entries its `audit` list names, with the claim already done. Between issues, this context holds the `manifest.json` and each issue's output block.
+- Claim the track's issues, as deliver does, before its subagent starts. Pass the subagent their draft paths and the audit entries their `audit` lists name, with the claims already done. Between tracks, this context holds the `manifest.json`, `tracks.md` and each track's output block.
 - After the claim, and before the branch, match the issue to its draft in `issues/` (`manifest.json` maps each draft key to its issue) and read the audit entries that draft's `audit` list names. They are the steps, and may change while building; the issue's acceptance is what must hold.
 - A finding that is a program of its own stays a decision draft; propose an audit for it at hand off.
-- Keep audit keys and audit dir paths out of branch names, titles and bodies.
+- Keep audit keys and audit dir paths out of branch names, titles and bodies. Track keys stay local too.
 
 ## Hand off
 
