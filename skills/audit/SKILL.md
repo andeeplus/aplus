@@ -49,7 +49,10 @@ Artifacts go under the audit dir. Check that it is gitignored when it is inside 
   synthesis.md             cross-audit only: where the authors agree and differ
   issues/                  issue drafts and manifest.json
   tracks.md                the track plan, when the program is executed
+{audit dir}/handoffs/      handoff notes, one per paused branch, written by the handoff skill
 ```
+
+A relative audit dir resolves against the primary checkout, so every worktree shares one audit, and removing a worktree keeps it. `--sync` copies handoff notes to the mirrors too.
 
 - **Date folder:** the date the program's first audit started. Everything for that program, including other authors' reviews, drafts and later days' work, stays in it, so the drafts share one `manifest.json`.
 - **Author slug:** kebab-case, such as `claude-opus`.

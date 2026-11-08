@@ -49,18 +49,18 @@ An agent reads top to bottom and acts early, so a skill puts each part before th
 
 One word per concept, in every skill and reference. Skills ship without this file, so a skill still says what a term means where it first uses it, such as "scratch files outside the tree".
 
-| Word                   | Means                                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------ |
-| **publish**            | Any action others see: push, open or edit a PR or issue, comment, transition, merge. |
-| **host**, **tracker**  | Where code and PRs live; where issues live.                                          |
-| **integration branch** | The branch PRs target.                                                               |
-| **gate**, **verdict**  | A check that must pass; its one-line result.                                         |
-| **finding**            | A review result, classed `easy`, `nit` or `rework`.                                  |
-| **track**              | A group of a program's issues shipped as one branch and one PR, a commit per issue.  |
-| **issue gates**        | A track gated after each issue's commits instead of once over the track.             |
-| **draft**              | An issue as a file, before it is created.                                            |
-| **scratch file**       | A file outside the tree, never committed.                                            |
-| **loop**               | The one command that reproduces a symptom.                                           |
+| Word                            | Means                                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **publish**                     | Any action others see: push, open or edit a PR or issue, comment, transition, merge.           |
+| **host**, **tracker**           | Where code and PRs live; where issues live.                                                    |
+| **integration branch**          | The branch PRs target.                                                                         |
+| **gate**, **verdict**           | A check that must pass; its one-line result.                                                   |
+| **finding**                     | A review result, classed `easy`, `nit` or `rework`.                                            |
+| **track**                       | A group of a program's issues shipped as one branch and one PR, each issue as its own commits. |
+| **track gate**, **issue gates** | A track's gate run once over the track (the default); run after each issue's commits instead.  |
+| **draft**                       | An issue as a file, before it is created.                                                      |
+| **scratch file**                | A file outside the tree, never committed.                                                      |
+| **loop**                        | The one command that reproduces a symptom.                                                     |
 
 ## Versions and changelog
 

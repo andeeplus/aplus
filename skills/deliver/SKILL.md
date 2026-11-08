@@ -1,11 +1,11 @@
 ---
 name: deliver
-description: Take an idea, a ticket or a program of issues to pull requests ready to merge, through triage or define, a review of any issue drafts, then the build, the ship gate and the PR or PR stack for each issue. Use to deliver or implement a ticket, issue, idea, feature or program end to end, in tracks or with issue gates.
+description: Take an idea, a ticket or a program of issues to pull requests ready to merge, through triage or define, a review of any issue drafts, then the build, the ship gate and the PR or PR stack for each issue or track. Use to deliver or implement a ticket, issue, idea, feature or program end to end, in tracks or with issue gates.
 ---
 
 # Deliver
 
-Automatic from spec to PR, every gate included. It waits for the user only to review a spec from define, any drafts as [Drafts](#drafts) says, a program's track plan, before a dangerous action, and, when a board exists, for the host skill's one-time board question.
+Automatic from spec to PR, every gate included. It waits for the user only to review a spec from define, any drafts as [Drafts](#drafts) says, a program's track plan, before a dangerous action, when a handoff note needs the audit dir gitignored, and, when a board exists, for the host skill's one-time board question.
 
 ## Rules
 
@@ -68,6 +68,7 @@ One block per issue, or per track in a program, then the drafts awaiting review:
 Verdict: ready to ship | parked at <step>: <reason>
 Reviews: all | <those that ran>; skipped: <reason>
 PRs: <url, one per stack layer> | not opened
+Moved: <issue> → <branch>: <reason>, for issues parked out of a track | none
 Drafts: <deferred findings drafted> | none
 Left: <open decisions and nits, file:line> | none
 ```

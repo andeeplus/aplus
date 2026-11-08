@@ -1,5 +1,14 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+	existsSync,
+	mkdirSync,
+	mkdtempSync,
+	readdirSync,
+	readFileSync,
+	realpathSync,
+	rmSync,
+	writeFileSync,
+} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from 'vitest';
@@ -132,6 +141,31 @@ test('starts an audit, adds a review, and stops when .audit/ is not ignored', ()
 		expect(existsSync(path.join(repo, '.audit/docs', date, 'program.md'))).toBe(false);
 	} finally {
 		rmSync(repo, { recursive: true, force: true });
+	}
+});
+
+test('run from a linked worktree, the audit lands in the primary checkout', () => {
+	const root = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'new-audit-')));
+	const repo = path.join(root, 'repo');
+	const linked = path.join(root, 'linked');
+	try {
+		execFileSync('git', ['init', '-q', '-b', 'main', repo]);
+		writeFileSync(path.join(repo, '.gitignore'), '.audit/\n');
+		execFileSync('git', ['add', '.gitignore'], { cwd: repo });
+		execFileSync('git', ['-c', 'user.email=a@b.c', '-c', 'user.name=t', 'commit', '-qm', 'init'], { cwd: repo });
+		execFileSync('git', ['worktree', 'add', '-q', '-b', 'fix/x', linked], { cwd: repo });
+		const env: NodeJS.ProcessEnv = { ...process.env, INIT_CWD: linked };
+		delete env.APLUS_AUDIT_DIRS;
+		const result = spawnSync(
+			process.execPath,
+			['--experimental-strip-types', SCRIPT, 'router', '--author', 'a', '--model', 'm'],
+			{ cwd: linked, env, encoding: 'utf8' },
+		);
+		expect(result.status).toBe(0);
+		expect(existsSync(path.join(repo, '.audit/router'))).toBe(true);
+		expect(existsSync(path.join(linked, '.audit'))).toBe(false);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
 	}
 });
 

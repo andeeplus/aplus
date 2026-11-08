@@ -18,7 +18,7 @@ git diff HEAD -- . "${LOCKS[@]}"
 git ls-files --others --exclude-standard -- . "${LOCKS[@]}"
 ```
 
-- the branch diff against its base: run `git fetch` first. The base is the project's integration branch, or, for a stacked PR, the branch below it;
+- the branch diff against its base: run `git fetch` first. The base is the project's integration branch, or, for a stacked PR, the branch below it. A caller may name a commit instead, such as the one before an issue's commits; use it as is, without `origin/`;
 - uncommitted changes;
 - untracked files, which skip gitignored ones.
 

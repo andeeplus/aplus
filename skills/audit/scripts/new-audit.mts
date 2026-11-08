@@ -14,7 +14,9 @@
  *
  * The audit dirs come from `APLUS_AUDIT_DIRS` in the environment or the repository's root `.env`, a list separated by
  * commas. The first is the working copy and defaults to `.audit`;
- * the others are mirrors. `{project}` in an entry becomes the repository's name. Run it from inside the repository.
+ * the others are mirrors. `{project}` in an entry becomes the repository's name. Run it from inside the repository: a
+ * relative dir resolves against the primary checkout, and `.env` is read from this checkout, then the primary one, so
+ * every worktree shares one audit and removing a worktree keeps it.
  * It stops when a dir inside the repository is not gitignored.
  */
 import { execFileSync } from 'node:child_process';
@@ -56,6 +58,14 @@ export function projectName(root: string): string {
 			.split(/[/:\\]/)
 			.pop() || path.basename(root);
 	return name.replace(/[^\w.-]/g, '-');
+}
+
+/** The primary checkout of the repository at `cwd`: the first entry `git worktree list` prints. */
+export function primaryCheckout(cwd: string): string {
+	const first =
+		execFileSync('git', ['worktree', 'list', '--porcelain'], { cwd, encoding: 'utf8' }).split('\n')[0] ?? '';
+	if (!first.startsWith('worktree ')) throw new Error('No primary worktree');
+	return first.slice('worktree '.length);
 }
 
 /** The audit dirs from `APLUS_AUDIT_DIRS`, absolute; the first is the working copy, the rest mirrors. */
@@ -177,11 +187,14 @@ if (isMain) {
 		) {
 			throw new Error(usage);
 		}
-		const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd, encoding: 'utf8' }).trim();
-		try {
-			process.loadEnvFile(path.join(root, '.env'));
-		} catch (error) {
-			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+		const toplevel = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd, encoding: 'utf8' }).trim();
+		const root = primaryCheckout(cwd);
+		for (const dir of new Set([toplevel, root])) {
+			try {
+				process.loadEnvFile(path.join(dir, '.env'));
+			} catch (error) {
+				if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+			}
 		}
 		const dirs = auditDirs(process.env.APLUS_AUDIT_DIRS, root, projectName(root));
 		if (values.find) {

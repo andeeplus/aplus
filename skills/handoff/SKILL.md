@@ -9,7 +9,7 @@ The note is a contract: the next agent trusts it, so mark what you only assumed.
 
 ## Script
 
-Prints the current branch's note path and creates its folder: `handoffs/<branch>.md` under the audit dir, the first entry of `APLUS_AUDIT_DIRS` (environment or `.env`, default `.audit`), resolved from the primary checkout so every worktree shares it. `--branch <name>` names another branch; `--list` prints each branch with a note and its path. It stops when the dir is inside the repository and not gitignored: ask the user before adding it to `.gitignore`.
+Prints the current branch's note path and creates its folder: `handoffs/<branch>.md` under the audit dir, the first entry of `APLUS_AUDIT_DIRS` (environment or `.env`, default `.audit`), resolved from the primary checkout so every worktree shares it. `--branch <name>` names another branch, and is needed on a detached HEAD; `--list` prints each branch with a note and its path. Before creating the folder, it stops when the dir is inside the repository and not gitignored: ask the user before adding it to `.gitignore`.
 
 ```sh
 node --experimental-strip-types <this skill's folder>/scripts/handoff-note.mts [--branch <name>] [--list]

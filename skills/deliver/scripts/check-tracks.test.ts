@@ -24,14 +24,13 @@ test('parses tracks, issues and blockers', () => {
 	expect(parseTracks(PLAN)).toEqual([
 		{
 			key: 'errors',
-			title: 'Route errors carry their cause',
 			issues: [
 				{ ref: '#12', blockedBy: [] },
 				{ ref: '#14', blockedBy: ['#12', '#9'] },
 			],
 		},
-		{ key: 'cache', title: 'Invalidate on route change', issues: [{ ref: '#20', blockedBy: ['#14'] }] },
-		{ key: 'docs', title: 'Document the router', issues: [{ ref: '#30', blockedBy: [] }] },
+		{ key: 'cache', issues: [{ ref: '#20', blockedBy: ['#14'] }] },
+		{ key: 'docs', issues: [{ ref: '#30', blockedBy: [] }] },
 	]);
 });
 
@@ -51,6 +50,16 @@ test('stacks on the latest blocking track, and waits only for blocking tracks ou
 	expect(checkTracks(parseTracks(deep)).lines.at(-1)).toBe('d: 1 issues, stacks on c');
 });
 
+test('a reason line or another heading adds no issue', () => {
+	const plan = `## a: A\n> Shares the parser\n- #1 x\n### Why\n- Shares the parser\n## Notes\n- not an issue\n`;
+	expect(parseTracks(plan)).toEqual([{ key: 'a', issues: [{ ref: '#1', blockedBy: [] }] }]);
+});
+
+test('a track waiting on several tracks names each', () => {
+	const plan = `## a: A\n- #1 x\n## b: B\n- #2 y\n## c: C\n- #3 z\n## d: D\n- #4 w (blocked by #1, #2, #3)\n`;
+	expect(checkTracks(parseTracks(plan)).lines.at(-1)).toBe('d: 1 issues, stacks on c, waits for a, b');
+});
+
 test('flags a track over the soft limit without failing', () => {
 	const big = `## a: A\n- #1 x\n- #2 y\n- #3 z\n- #4 w\n`;
 	expect(checkTracks(parseTracks(big))).toEqual({ errors: [], lines: ['a: 4 issues, base, over the soft limit'] });
@@ -65,6 +74,11 @@ test('rejects duplicates, empty tracks, late blockers and a plan that differs fr
 		'#1: blocked by #2, which comes later',
 	]);
 	expect(checkTracks([]).errors).toEqual(['no "## <track-key>: <title>" heading']);
+	const twice = `## a: A\n- #1 x (blocked by #1)\n## a: B\n- #2 y\n`;
+	expect(checkTracks(parseTracks(twice)).errors).toEqual([
+		'a: track key in more than one place',
+		'#1: blocked by itself',
+	]);
 });
 
 test('the command line exits 1 on errors and prints the bases otherwise', () => {
@@ -80,6 +94,11 @@ test('the command line exits 1 on errors and prints the bases otherwise', () => 
 		});
 		expect(missing.status).toBe(1);
 		expect(missing.stderr).toBe('[error] #30: not a program issue\n');
+		const absent = spawnSync('node', ['--experimental-strip-types', SCRIPT, path.join(dir, 'none.md')], {
+			encoding: 'utf8',
+		});
+		expect(absent.status).toBe(1);
+		expect(absent.stderr).toMatch(/^\[error\] ENOENT/);
 	} finally {
 		rmSync(dir, { recursive: true, force: true });
 	}

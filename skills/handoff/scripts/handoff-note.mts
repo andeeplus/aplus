@@ -6,12 +6,13 @@
  * Notes live in `<audit dir>/handoffs/<branch>.md`, where the audit dir is the first entry of `APLUS_AUDIT_DIRS` (from
  * the environment or the repository's root `.env`), defaulting to `.audit`, and `{project}` becomes the repository's
  * name. A relative audit dir resolves against the primary checkout, so every worktree shares one note and removing a
- * worktree keeps it. It stops when the dir is inside the repository and not gitignored.
+ * worktree keeps it. It stops on a detached HEAD without `--branch`, on a name git would refuse as a branch, and, before
+ * creating a folder, when the dir is inside the repository and not gitignored.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, realpathSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import path from 'node:path';
-import { parseArgs } from 'node:util';
+import { parseArgs, parseEnv } from 'node:util';
 
 function git(cwd: string, args: string[]): string {
 	return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
@@ -41,18 +42,30 @@ export function handoffDir(value: string | undefined, primary: string, project: 
 	return path.resolve(primary, first.replaceAll('{project}', project), 'handoffs');
 }
 
-/** The primary checkout of the repository at `cwd`, and the handoffs folder after reading `.env`. */
-export function locate(cwd: string): { primary: string; dir: string } {
-	const toplevel = git(cwd, ['rev-parse', '--show-toplevel']);
-	const primary = path.dirname(realpathSync(git(cwd, ['rev-parse', '--path-format=absolute', '--git-common-dir'])));
-	for (const root of new Set([toplevel, primary])) {
-		try {
-			process.loadEnvFile(path.join(root, '.env'));
-		} catch (error) {
-			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-		}
+/** `APLUS_AUDIT_DIRS` from `env`, else from the first of `roots` whose `.env` sets it; `env` is not changed. */
+export function auditDirsValue(env: NodeJS.ProcessEnv, roots: string[]): string | undefined {
+	if (env.APLUS_AUDIT_DIRS !== undefined) return env.APLUS_AUDIT_DIRS;
+	for (const root of roots) {
+		const file = path.join(root, '.env');
+		if (!existsSync(file)) continue;
+		const value = parseEnv(readFileSync(file, 'utf8')).APLUS_AUDIT_DIRS;
+		if (value !== undefined) return value;
 	}
-	return { primary, dir: handoffDir(process.env.APLUS_AUDIT_DIRS, primary, projectName(primary)) };
+	return undefined;
+}
+
+/** The primary checkout of the repository at `cwd`: the first entry `git worktree list` prints. */
+export function primaryCheckout(cwd: string): string {
+	const first = git(cwd, ['worktree', 'list', '--porcelain']).split('\n')[0] ?? '';
+	if (!first.startsWith('worktree ')) throw new Error('No primary worktree');
+	return first.slice('worktree '.length);
+}
+
+/** The primary checkout of the repository at `cwd`, and its handoffs folder. */
+export function locate(cwd: string, env: NodeJS.ProcessEnv = process.env): { primary: string; dir: string } {
+	const toplevel = git(cwd, ['rev-parse', '--show-toplevel']);
+	const primary = primaryCheckout(cwd);
+	return { primary, dir: handoffDir(auditDirsValue(env, [toplevel, primary]), primary, projectName(primary)) };
 }
 
 /** The branches with a note in `dir`, such as `fix/thing` for `fix/thing.md`. */
@@ -74,20 +87,26 @@ if (isMain) {
 		});
 		const cwd = process.env.INIT_CWD ?? process.cwd();
 		const { primary, dir } = locate(cwd);
-		const rel = path.relative(primary, dir);
-		if (!rel.startsWith('..') && !path.isAbsolute(rel)) {
-			try {
-				execFileSync('git', ['check-ignore', '-q', `${rel}/`], { cwd: primary });
-			} catch {
-				throw new Error(`${rel}/ is not gitignored. Ask the user before adding it to .gitignore.`);
-			}
-		}
 		if (values.list) {
 			const notes = listNotes(dir);
 			if (!notes.length) throw new Error(`No handoff note in ${dir}`);
 			for (const branch of notes) console.log(`${branch}\t${path.join(dir, `${branch}.md`)}`);
 		} else {
 			const branch = values.branch ?? git(cwd, ['rev-parse', '--abbrev-ref', 'HEAD']);
+			if (branch === 'HEAD') throw new Error('HEAD is detached. Name the branch with --branch.');
+			try {
+				git(cwd, ['check-ref-format', '--branch', branch]);
+			} catch {
+				throw new Error(`${branch} is not a valid branch name.`);
+			}
+			const rel = path.relative(primary, dir);
+			if (!rel.startsWith('..') && !path.isAbsolute(rel)) {
+				try {
+					execFileSync('git', ['check-ignore', '-q', `${rel}/`], { cwd: primary });
+				} catch {
+					throw new Error(`${rel}/ is not gitignored. Ask the user before adding it to .gitignore.`);
+				}
+			}
 			const note = path.join(dir, `${branch}.md`);
 			mkdirSync(path.dirname(note), { recursive: true });
 			console.log(note);
